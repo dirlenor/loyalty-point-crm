@@ -8,36 +8,10 @@ import { Button } from "@/components/ui/button";
 
 export default async function HomePage() {
   const stats = await getDashboardStats();
-  const currentDate = format(new Date(), "EEE, d MMM yyyy");
 
   return (
     <DashboardLayout>
       <div className="p-6">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
-            <div>
-              <h1 className="text-2xl font-bold text-[#1c1d1d] mb-1">
-                สวัสดี Admin 👋🏻
-              </h1>
-              <p className="text-[#6b7280] text-sm">
-                มาดูสถิติและจัดการระบบแต้มสะสมกันเถอะ
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <p className="text-sm text-[#6b7280] hidden sm:block">
-                {currentDate}
-              </p>
-              <Link href="/customer/login" target="_blank">
-                <Button className="bg-[#ff4b00] hover:bg-[#ff4b00]/90 text-white gap-2">
-                  <Gift className="w-4 h-4" />
-                  Customer App
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
