@@ -14,12 +14,24 @@ export default async function HomePage() {
       <div className="p-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#211c37] mb-2">
-            สวัสดี Admin 👋🏻
-          </h1>
-          <p className="text-[#85878d] text-lg">
-            มาดูสถิติและจัดการระบบแต้มสะสมกันเถอะ!
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-[#211c37] mb-2">
+                สวัสดี Admin 👋🏻
+              </h1>
+              <p className="text-[#85878d] text-lg">
+                มาดูสถิติและจัดการระบบแต้มสะสมกันเถอะ!
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/customer/login" target="_blank">
+                <Button variant="outline" className="gap-2">
+                  <Award className="w-4 h-4" />
+                  Customer App
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Stats Cards */}

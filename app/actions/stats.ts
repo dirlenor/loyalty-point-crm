@@ -59,6 +59,14 @@ export async function getDashboardStats() {
     .order("created_at", { ascending: false })
     .limit(5);
 
+  // Get available rewards (with stock > 0)
+  const { data: availableRewards } = await supabase
+    .from("rewards")
+    .select("*")
+    .gt("stock", 0)
+    .order("points_required", { ascending: true })
+    .limit(10);
+
   return {
     totalCustomers: totalCustomers || 0,
     totalPoints,
@@ -67,6 +75,7 @@ export async function getDashboardStats() {
     totalRewards: totalRewards || 0,
     recentRedemptions: recentRedemptions || [],
     recentRewards: recentRewards || [],
+    availableRewards: availableRewards || [],
   };
 }
 

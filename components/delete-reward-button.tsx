@@ -60,7 +60,7 @@ export function DeleteRewardButton({ rewardId, rewardTitle }: DeleteRewardButton
         <DialogHeader>
           <DialogTitle>ยืนยันการลบ</DialogTitle>
           <DialogDescription>
-            คุณแน่ใจหรือไม่ว่าต้องการลบรางวัล "{rewardTitle}"? 
+            คุณแน่ใจหรือไม่ว่าต้องการลบรางวัล &quot;{rewardTitle}&quot;? 
             การกระทำนี้ไม่สามารถยกเลิกได้
           </DialogDescription>
         </DialogHeader>

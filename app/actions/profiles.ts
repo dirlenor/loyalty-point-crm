@@ -19,13 +19,19 @@ export async function findProfileByPhone(phone: string) {
     .from("profiles")
     .select("*")
     .eq("phone", phone)
+    .eq("role", "customer")
     .single();
 
   if (error) {
     if (error.code === "PGRST116") {
-      return { success: false, message: "ไม่พบข้อมูลลูกค้า", data: null };
+      return { success: false, message: "ไม่พบข้อมูลลูกค้า กรุณาตรวจสอบเบอร์โทรศัพท์", data: null };
     }
-    return { success: false, message: "เกิดข้อผิดพลาด", data: null };
+    console.error("Error finding profile:", error);
+    return { success: false, message: `เกิดข้อผิดพลาด: ${error.message}`, data: null };
+  }
+
+  if (!data) {
+    return { success: false, message: "ไม่พบข้อมูลลูกค้า", data: null };
   }
 
   return { success: true, message: "พบข้อมูลลูกค้า", data };
