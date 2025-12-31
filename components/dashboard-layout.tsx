@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X } from "lucide-react";
+import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -17,133 +17,127 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const menuItems = [
     { href: "/", label: "Dashboard", icon: Home },
     { href: "/admin/customers", label: "สมาชิก", icon: UserCircle },
-    { href: "/admin/rewards", label: "รางวัล", icon: Gift },
-    { href: "/admin/collect-points", label: "เพิ่มแต้ม", icon: Users },
+    { href: "/admin/rewards", label: "รางวัลทั้งหมด", icon: Gift },
     { href: "/admin/redemptions", label: "รายการแลก", icon: ShoppingBag },
+    { href: "/admin/history", label: "ประวัติทั้งหมด", icon: History },
     { href: "/store", label: "ร้านรางวัล", icon: Award },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-[#e4e4e4] h-[65px] flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 flex-shrink-0">
-        <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-            <div className="w-8 h-8 bg-[#ff4b00] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CRM</span>
+    <div className="min-h-screen bg-[#f5f7fa] flex">
+      {/* Sidebar */}
+      <aside className="hidden md:flex flex-col w-[260px] bg-white border-r border-[#e5e7eb] flex-shrink-0 fixed left-0 top-0 h-screen">
+        {/* Logo Section */}
+        <div className="p-6 border-b border-[#e5e7eb] flex-shrink-0">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#ff4b00] rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">CRM</span>
             </div>
-            <span className="font-semibold text-lg md:text-xl tracking-wider text-[#1c1d1d] hidden sm:inline">Loyalty Point</span>
+            <span className="font-bold text-xl text-[#1c1d1d]">Loyalty Point</span>
           </Link>
+        </div>
 
-          {/* Search Bar */}
-          <div className="hidden lg:flex items-center gap-4 flex-1 max-w-md">
-            <div className="border border-[#ff4b00] rounded-md flex items-center justify-between px-3 py-2 w-full max-w-[334px]">
-              <div className="flex items-center gap-3">
-                <svg className="w-4 h-4 text-[#ff4b00] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <span className="text-sm text-[#afafaf]">ค้นหา</span>
+        {/* Navigation Menu */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || 
+              (item.href !== "/" && pathname?.startsWith(item.href));
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
+                  isActive
+                    ? "bg-[#ff4b00] text-white shadow-sm"
+                    : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
+                )}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 md:ml-[260px]">
+        {/* Header */}
+        <header className="bg-white border-b border-[#e5e7eb] h-[70px] flex items-center justify-between px-6 sticky top-0 z-50 flex-shrink-0">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-50 cursor-pointer"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Notification */}
+            <button className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-50 cursor-pointer relative">
+              <svg className="w-5 h-5 text-[#6b7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </button>
+            
+            {/* Profile */}
+            <div className="flex items-center gap-3 pl-3 border-l border-[#e5e7eb]">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex-shrink-0"></div>
+              <div className="hidden sm:block">
+                <p className="text-sm font-medium text-[#1c1d1d]">Admin</p>
+                <p className="text-xs text-[#6b7280]">Administrator</p>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-[rgba(255,75,0,0.06)] rounded px-2 py-1 text-xs text-[#ff4b00]">⌘K</div>
-              </div>
+              <svg className="w-4 h-4 text-[#6b7280] hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden w-8 h-8 rounded-lg border border-[#e7eae9] flex items-center justify-center hover:bg-gray-50 cursor-pointer flex-shrink-0"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-4 h-4" />
-            ) : (
-              <Menu className="w-4 h-4" />
-            )}
-          </button>
-          
-          <div className="hidden md:flex w-8 h-8 rounded-lg border border-[#e7eae9] items-center justify-center hover:bg-gray-50 cursor-pointer flex-shrink-0">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-b border-[#e5e7eb]">
+            <nav className="p-4 space-y-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href || 
+                  (item.href !== "/" && pathname?.startsWith(item.href));
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+                      isActive
+                        ? "bg-[#ff4b00] text-white"
+                        : "text-[#6b7280] hover:bg-[#f9fafb]"
+                    )}
+                  >
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex-shrink-0"></div>
-            <span className="text-sm font-medium text-[#1c1d1d] hidden sm:inline">Admin</span>
-            <svg className="w-4 h-4 text-[#1c1d1d] hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#f9f9f9] border-b border-[#e4e4e4]">
-          <nav className="p-4 space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href || 
-                (item.href !== "/" && pathname?.startsWith(item.href));
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                    isActive
-                      ? "bg-[#ff4b00] text-white"
-                      : "text-[#727272] hover:bg-gray-100"
-                  )}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-[223px] bg-[#f9f9f9] border-r border-[#e4e4e4] sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto flex-shrink-0">
-          <nav className="p-4 space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href || 
-                (item.href !== "/" && pathname?.startsWith(item.href));
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                    isActive
-                      ? "bg-[#ff4b00] text-white"
-                      : "text-[#727272] hover:bg-gray-100"
-                  )}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </aside>
+        )}
 
         {/* Main Content */}
-        <main className="flex-1 min-h-[calc(100vh-65px)] overflow-y-auto bg-[#f9f9f9]">
+        <main className="flex-1 overflow-y-auto bg-[#f5f7fa]">
           {children}
         </main>
       </div>
     </div>
   );
 }
-

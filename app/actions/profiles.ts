@@ -63,6 +63,7 @@ export async function addPoints(profileId: string, points: number) {
     if (error) throw error;
 
     revalidatePath("/admin/collect-points");
+    revalidatePath("/admin/customers");
     return { success: true, message: `เพิ่มแต้ม ${points} แต้มสำเร็จ` };
   } catch (error: any) {
     return { 
@@ -106,6 +107,89 @@ export async function createProfile(formData: FormData) {
     return { 
       success: false, 
       message: error.message || "เกิดข้อผิดพลาดในการสร้างโปรไฟล์" 
+    };
+  }
+}
+
+export async function updateCustomer(id: string, formData: FormData) {
+  const supabase = createServerClient();
+
+  const full_name = formData.get("full_name") as string;
+  const phone = formData.get("phone") as string;
+
+  try {
+    if (!full_name || full_name.trim().length === 0) {
+      return { success: false, message: "กรุณากรอกชื่อ" };
+    }
+
+    phoneSchema.parse(phone);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name, phone })
+      .eq("id", id)
+      .eq("role", "customer");
+
+    if (error) {
+      if (error.code === "23505") {
+        return { success: false, message: "เบอร์โทรศัพท์นี้มีอยู่ในระบบแล้ว" };
+      }
+      throw error;
+    }
+
+    revalidatePath("/admin/customers");
+    return { success: true, message: "อัปเดตข้อมูลสำเร็จ" };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.message || "เกิดข้อผิดพลาดในการอัปเดตข้อมูล" 
+    };
+  }
+}
+
+export async function deleteCustomer(id: string) {
+  const supabase = createServerClient();
+
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", id)
+      .eq("role", "customer");
+
+    if (error) throw error;
+
+    revalidatePath("/admin/customers");
+    return { success: true, message: "ลบสมาชิกสำเร็จ" };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.message || "เกิดข้อผิดพลาดในการลบสมาชิก" 
+    };
+  }
+}
+
+export async function banCustomer(id: string, banned: boolean) {
+  const supabase = createServerClient();
+
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ banned })
+      .eq("id", id)
+      .eq("role", "customer");
+
+    if (error) throw error;
+
+    revalidatePath("/admin/customers");
+    return { 
+      success: true, 
+      message: banned ? "ระงับสมาชิกสำเร็จ" : "ยกเลิกการระงับสมาชิกสำเร็จ" 
+    };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.message || "เกิดข้อผิดพลาดในการระงับสมาชิก" 
     };
   }
 }

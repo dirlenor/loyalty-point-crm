@@ -10,7 +10,7 @@ export default async function StorePage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 md:p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">ร้านรางวัล</h1>
         <p className="text-muted-foreground">

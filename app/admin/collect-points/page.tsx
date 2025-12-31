@@ -131,7 +131,7 @@ export default function CollectPointsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <Card>
         <CardHeader>
           <CardTitle>เพิ่มแต้มให้ลูกค้า</CardTitle>
