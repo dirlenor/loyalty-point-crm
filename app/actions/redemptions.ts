@@ -128,23 +128,30 @@ export async function createRedemption(customerId: string, rewardId: string) {
     // Send LINE notification if customer has LINE User ID
     if (customerProfile?.line_user_id && rewardData) {
       try {
+        console.log("Sending LINE notification to:", customerProfile.line_user_id);
         const { sendLineMessage, formatRedemptionMessage } = await import(
           "@/lib/line/notify"
         );
-        const remainingPoints = (customer.total_points || 0) - reward.points_required;
         const message = formatRedemptionMessage(
           rewardData.title,
           reward.points_required,
           newTotalPoints
         );
-        await sendLineMessage({
+        const result = await sendLineMessage({
           lineUserId: customerProfile.line_user_id,
           message,
         });
+        if (result.success) {
+          console.log("LINE notification sent successfully");
+        } else {
+          console.error("LINE notification failed:", result.error);
+        }
       } catch (notifyError) {
         // Don't fail the whole operation if notification fails
         console.error("Failed to send LINE notification:", notifyError);
       }
+    } else {
+      console.log("Customer has no LINE User ID or reward data missing, skipping notification");
     }
 
     revalidatePath("/store");
