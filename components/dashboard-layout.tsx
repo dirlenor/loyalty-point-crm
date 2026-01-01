@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History } from "lucide-react";
+import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History, FileCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getPendingSlipCount } from "@/app/actions/slip-submissions";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,12 +14,25 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pendingSlipCount, setPendingSlipCount] = useState(0);
+
+  useEffect(() => {
+    const loadPendingCount = async () => {
+      const count = await getPendingSlipCount();
+      setPendingSlipCount(count);
+    };
+    loadPendingCount();
+    // Refresh every 30 seconds
+    const interval = setInterval(loadPendingCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const menuItems = [
     { href: "/", label: "Dashboard", icon: Home },
     { href: "/admin/customers", label: "สมาชิก", icon: UserCircle },
     { href: "/admin/rewards", label: "รางวัลทั้งหมด", icon: Gift },
     { href: "/admin/redemptions", label: "รายการแลก", icon: ShoppingBag },
+    { href: "/admin/slip-review", label: "ตรวจสอบสลิป", icon: FileCheck, badge: true },
     { href: "/admin/history", label: "ประวัติทั้งหมด", icon: History },
     { href: "/store", label: "ร้านรางวัล", icon: Award },
   ];
@@ -57,6 +71,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm font-medium">{item.label}</span>
+                {item.badge && pendingSlipCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {pendingSlipCount > 9 ? "9+" : pendingSlipCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -126,6 +145,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm font-medium">{item.label}</span>
+                    {item.badge && pendingSlipCount > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {pendingSlipCount > 9 ? "9+" : pendingSlipCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
