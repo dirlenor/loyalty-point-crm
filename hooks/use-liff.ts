@@ -45,18 +45,51 @@ export function useLiff(): UseLiffReturn {
         throw new Error("LIFF ID is not configured. Please set NEXT_PUBLIC_LIFF_ID in your environment variables.");
       }
 
-      addLog(`LIFF ID: ${liffId.substring(0, 10)}...`);
+      addLog(`LIFF ID ที่ใช้: ${liffId}`);
+      
+      // Try to get LIFF ID from URL context_token if available
+      let actualLiffId = liffId;
+      try {
+        const urlParams = new URLSearchParams(window.location.hash.substring(1));
+        const contextToken = urlParams.get('context_token');
+        if (contextToken) {
+          try {
+            const decoded = JSON.parse(atob(contextToken.split('.')[1]));
+            if (decoded.liffId) {
+              actualLiffId = decoded.liffId;
+              addLog(`พบ LIFF ID จาก URL: ${actualLiffId}`);
+              if (actualLiffId !== liffId) {
+                addLog(`⚠️ LIFF ID ไม่ตรงกัน! Config: ${liffId}, URL: ${actualLiffId}`);
+                addLog(`ใช้ LIFF ID จาก URL แทน`);
+              }
+            }
+          } catch (e) {
+            addLog(`ไม่สามารถ decode context_token: ${e}`);
+          }
+        }
+      } catch (e) {
+        addLog(`ไม่สามารถอ่าน URL params: ${e}`);
+      }
 
       // Initialize LIFF with error handling
       try {
-        addLog("กำลังเรียก liff.init()...");
-        await liff.init({ liffId });
+        addLog(`กำลังเรียก liff.init() ด้วย LIFF ID: ${actualLiffId}...`);
+        await liff.init({ liffId: actualLiffId });
         addLog("✓ LIFF initialized สำเร็จ");
       } catch (initError: any) {
-        addLog(`ERROR: LIFF init failed - ${initError.message || initError.code || 'Unknown error'}`);
+        addLog(`ERROR: LIFF init failed - ${initError.message || initError.code || JSON.stringify(initError)}`);
         // Check for specific error codes
-        if (initError.code === "INVALID_LIFF_ID" || initError.message?.includes("400")) {
-          throw new Error("LIFF App ID ไม่ถูกต้อง หรือ Endpoint URL ไม่ตรงกับที่ตั้งค่าใน LINE Developers Console. กรุณาตรวจสอบการตั้งค่า LIFF App");
+        if (initError.code === "INVALID_LIFF_ID" || initError.message?.includes("Invalid LIFF ID") || initError.message?.includes("400")) {
+          const errorMsg = `LIFF App ID ไม่ถูกต้อง!
+          
+LIFF ID ที่ตั้งค่า: ${liffId}
+LIFF ID จาก URL: ${actualLiffId}
+          
+กรุณาตรวจสอบ:
+1. LIFF App ID ใน LINE Developers Console
+2. LIFF Endpoint URL ต้องเป็น: https://loyalty-point-crm.vercel.app/customer/login
+3. Environment Variable NEXT_PUBLIC_LIFF_ID ใน Vercel`;
+          throw new Error(errorMsg);
         }
         throw initError;
       }
