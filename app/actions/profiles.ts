@@ -194,3 +194,116 @@ export async function banCustomer(id: string, banned: boolean) {
   }
 }
 
+export async function findProfileByLineUserId(lineUserId: string) {
+  const supabase = createServerClient();
+
+  if (!lineUserId || lineUserId.trim().length === 0) {
+    return { success: false, message: "LINE User ID is required", data: null };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("line_user_id", lineUserId)
+      .eq("role", "customer")
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        return { success: false, message: "ไม่พบข้อมูลลูกค้า", data: null };
+      }
+      console.error("Error finding profile by LINE User ID:", error);
+      return { success: false, message: `เกิดข้อผิดพลาด: ${error.message}`, data: null };
+    }
+
+    if (!data) {
+      return { success: false, message: "ไม่พบข้อมูลลูกค้า", data: null };
+    }
+
+    return { success: true, message: "พบข้อมูลลูกค้า", data };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "เกิดข้อผิดพลาดในการค้นหาข้อมูลลูกค้า",
+      data: null,
+    };
+  }
+}
+
+export async function findOrCreateProfileByLineUserId(
+  lineUserId: string,
+  displayName: string
+) {
+  const supabase = createServerClient();
+
+  if (!lineUserId || lineUserId.trim().length === 0) {
+    return { success: false, message: "LINE User ID is required", data: null };
+  }
+
+  if (!displayName || displayName.trim().length === 0) {
+    return { success: false, message: "Display Name is required", data: null };
+  }
+
+  try {
+    // Try to find existing profile
+    const { data: existingProfile, error: findError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("line_user_id", lineUserId)
+      .eq("role", "customer")
+      .single();
+
+    // If profile exists, return it
+    if (existingProfile && !findError) {
+      return { success: true, message: "พบข้อมูลลูกค้า", data: existingProfile };
+    }
+
+    // If error is not "not found", return error
+    if (findError && findError.code !== "PGRST116") {
+      console.error("Error finding profile:", findError);
+      return {
+        success: false,
+        message: `เกิดข้อผิดพลาด: ${findError.message}`,
+        data: null,
+      };
+    }
+
+    // Profile doesn't exist, create new one
+    const { data: newProfile, error: createError } = await supabase
+      .from("profiles")
+      .insert([
+        {
+          line_user_id: lineUserId,
+          full_name: displayName,
+          total_points: 0,
+          role: "customer",
+        },
+      ])
+      .select()
+      .single();
+
+    if (createError) {
+      console.error("Error creating profile:", createError);
+      return {
+        success: false,
+        message: `เกิดข้อผิดพลาดในการสร้างโปรไฟล์: ${createError.message}`,
+        data: null,
+      };
+    }
+
+    revalidatePath("/admin/customers");
+    return {
+      success: true,
+      message: "สร้างโปรไฟล์ใหม่สำเร็จ",
+      data: newProfile,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "เกิดข้อผิดพลาดในการค้นหาหรือสร้างโปรไฟล์",
+      data: null,
+    };
+  }
+}
+

@@ -26,10 +26,11 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("customer_phone");
+    localStorage.removeItem("line_user_id");
     localStorage.removeItem("customer_id");
     localStorage.removeItem("customer_name");
     localStorage.removeItem("customer_points");
+    localStorage.removeItem("customer_picture");
     router.push("/customer/login");
   };
 

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomerLayout } from "@/components/customer-layout";
 import { CustomerRedeemButton } from "@/components/customer-redeem-button";
 import { Award } from "lucide-react";
-import { findProfileByPhone } from "@/app/actions/profiles";
+import { findProfileByLineUserId } from "@/app/actions/profiles";
 
 export default function CustomerStorePage() {
   const [rewards, setRewards] = useState<any[]>([]);
@@ -16,8 +16,8 @@ export default function CustomerStorePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const phone = localStorage.getItem("customer_phone");
-    if (!phone) {
+    const lineUserId = localStorage.getItem("line_user_id");
+    if (!lineUserId) {
       router.push("/customer/login");
       return;
     }
@@ -25,7 +25,7 @@ export default function CustomerStorePage() {
     const loadData = async () => {
       try {
         // Load customer data
-        const customerResult = await findProfileByPhone(phone);
+        const customerResult = await findProfileByLineUserId(lineUserId);
         if (customerResult.success && customerResult.data) {
           setCustomer(customerResult.data);
           localStorage.setItem("customer_points", customerResult.data.total_points?.toString() || "0");

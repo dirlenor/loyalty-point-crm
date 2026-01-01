@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CustomerLayout } from "@/components/customer-layout";
 import { Award, Gift, ShoppingBag, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { findProfileByPhone } from "@/app/actions/profiles";
+import { findProfileByLineUserId } from "@/app/actions/profiles";
 import { getRewards } from "@/app/actions/rewards";
 import { getCustomerRedemptions } from "@/app/actions/customer-redemptions";
 import { format } from "date-fns";
@@ -21,15 +21,15 @@ export default function CustomerDashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const phone = localStorage.getItem("customer_phone");
-    if (!phone) {
+    const lineUserId = localStorage.getItem("line_user_id");
+    if (!lineUserId) {
       router.push("/customer/login");
       return;
     }
 
     const loadData = async () => {
       try {
-        const result = await findProfileByPhone(phone);
+        const result = await findProfileByLineUserId(lineUserId);
         if (result.success && result.data) {
           setCustomer(result.data);
           localStorage.setItem("customer_points", result.data.total_points?.toString() || "0");

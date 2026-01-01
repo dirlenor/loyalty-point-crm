@@ -7,7 +7,7 @@ import { CustomerLayout } from "@/components/customer-layout";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Gift } from "lucide-react";
-import { findProfileByPhone } from "@/app/actions/profiles";
+import { findProfileByLineUserId } from "@/app/actions/profiles";
 import { getCustomerRedemptions } from "@/app/actions/customer-redemptions";
 
 export default function CustomerHistoryPage() {
@@ -17,8 +17,8 @@ export default function CustomerHistoryPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const phone = localStorage.getItem("customer_phone");
-    if (!phone) {
+    const lineUserId = localStorage.getItem("line_user_id");
+    if (!lineUserId) {
       router.push("/customer/login");
       return;
     }
@@ -26,7 +26,7 @@ export default function CustomerHistoryPage() {
     const loadData = async () => {
       try {
         // Load customer data
-        const customerResult = await findProfileByPhone(phone);
+        const customerResult = await findProfileByLineUserId(lineUserId);
         if (customerResult.success && customerResult.data) {
           setCustomer(customerResult.data);
           

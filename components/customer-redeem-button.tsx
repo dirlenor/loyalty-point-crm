@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { findProfileByPhone } from "@/app/actions/profiles";
+import { findProfileByLineUserId } from "@/app/actions/profiles";
 
 interface CustomerRedeemButtonProps {
   reward: {
@@ -35,9 +35,9 @@ export function CustomerRedeemButton({ reward }: CustomerRedeemButtonProps) {
 
   useEffect(() => {
     const loadCustomer = async () => {
-      const phone = localStorage.getItem("customer_phone");
-      if (phone) {
-        const result = await findProfileByPhone(phone);
+      const lineUserId = localStorage.getItem("line_user_id");
+      if (lineUserId) {
+        const result = await findProfileByLineUserId(lineUserId);
         if (result.success && result.data) {
           setCustomer(result.data);
         }
@@ -85,9 +85,9 @@ export function CustomerRedeemButton({ reward }: CustomerRedeemButtonProps) {
       setOpen(false);
       router.refresh();
       // Reload customer data
-      const phone = localStorage.getItem("customer_phone");
-      if (phone) {
-        const customerResult = await findProfileByPhone(phone);
+      const lineUserId = localStorage.getItem("line_user_id");
+      if (lineUserId) {
+        const customerResult = await findProfileByLineUserId(lineUserId);
         if (customerResult.success && customerResult.data) {
           setCustomer(customerResult.data);
           localStorage.setItem("customer_points", customerResult.data.total_points?.toString() || "0");
