@@ -114,9 +114,22 @@ export default function CustomerLoginPage() {
             <CardDescription>{liffError}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              กรุณาตรวจสอบการตั้งค่า LIFF App ID หรือลองใหม่อีกครั้ง
-            </p>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p className="text-center font-semibold">สาเหตุที่เป็นไปได้:</p>
+              <ul className="list-disc list-inside space-y-1 text-left">
+                <li>เปิดใน browser ธรรมดา (ต้องเปิดผ่าน LINE App)</li>
+                <li>LIFF Endpoint URL ไม่ตรงกับที่ตั้งค่า</li>
+                <li>LIFF App ID ไม่ถูกต้อง</li>
+                <li>Scope ที่ตั้งค่าไม่ถูกต้อง</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+              <p className="font-semibold mb-1">ตรวจสอบการตั้งค่า:</p>
+              <p>LIFF Endpoint URL ต้องเป็น:</p>
+              <p className="font-mono bg-white p-1 rounded mt-1">
+                https://loyalty-point-crm.vercel.app/customer/login
+              </p>
+            </div>
             <Button
               onClick={() => window.location.reload()}
               className="w-full"

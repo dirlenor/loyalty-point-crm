@@ -34,8 +34,26 @@ export function useLiff(): UseLiffReturn {
         throw new Error("LIFF ID is not configured. Please set NEXT_PUBLIC_LIFF_ID in your environment variables.");
       }
 
-      // Initialize LIFF
-      await liff.init({ liffId });
+      // Check if running in LINE App
+      const isInLine = /Line/i.test(navigator.userAgent) || window.location.href.includes('liff.line.me');
+      
+      if (!isInLine && typeof window !== "undefined") {
+        // If not in LINE App, show helpful message
+        throw new Error("กรุณาเปิดแอปพลิเคชันนี้ผ่าน LINE App เท่านั้น LIFF จะทำงานได้เฉพาะใน LINE App");
+      }
+
+      // Initialize LIFF with error handling
+      try {
+        await liff.init({ liffId });
+      } catch (initError: any) {
+        console.error("LIFF init error:", initError);
+        // Check for specific error codes
+        if (initError.code === "INVALID_LIFF_ID" || initError.message?.includes("400")) {
+          throw new Error("LIFF App ID ไม่ถูกต้อง หรือ Endpoint URL ไม่ตรงกับที่ตั้งค่าใน LINE Developers Console. กรุณาตรวจสอบการตั้งค่า LIFF App");
+        }
+        throw initError;
+      }
+
       setLiffInstance(liff);
       setIsInitialized(true);
 
@@ -45,13 +63,18 @@ export function useLiff(): UseLiffReturn {
 
       if (loggedIn) {
         // Get LINE profile
-        const lineProfile = await liff.getProfile();
-        setProfile({
-          userId: lineProfile.userId,
-          displayName: lineProfile.displayName,
-          pictureUrl: lineProfile.pictureUrl,
-          statusMessage: lineProfile.statusMessage,
-        });
+        try {
+          const lineProfile = await liff.getProfile();
+          setProfile({
+            userId: lineProfile.userId,
+            displayName: lineProfile.displayName,
+            pictureUrl: lineProfile.pictureUrl,
+            statusMessage: lineProfile.statusMessage,
+          });
+        } catch (profileError: any) {
+          console.error("Get profile error:", profileError);
+          throw new Error("ไม่สามารถดึงข้อมูล LINE Profile ได้. กรุณาตรวจสอบ Scope ที่ตั้งค่าใน LIFF App");
+        }
       } else {
         // If not logged in, login
         liff.login();
