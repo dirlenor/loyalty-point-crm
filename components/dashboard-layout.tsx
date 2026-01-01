@@ -31,9 +31,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="p-6 border-b border-[#e5e7eb] flex-shrink-0">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#ff4b00] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">CRM</span>
+              <span className="text-white font-bold text-lg">6</span>
             </div>
-            <span className="font-bold text-xl text-[#1c1d1d]">Loyalty Point</span>
+            <span className="font-bold text-xl text-[#1c1d1d]">6CAT Point</span>
           </Link>
         </div>
 

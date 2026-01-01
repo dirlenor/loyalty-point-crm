@@ -77,7 +77,7 @@ export default function CustomerDashboardPage() {
             สวัสดี {customer.full_name} 👋🏻
           </h1>
           <p className="text-[#85878d]">
-            ยินดีต้อนรับสู่ระบบ Loyalty Point
+            ยินดีต้อนรับสู่ระบบ 6CAT Point
           </p>
         </div>
 

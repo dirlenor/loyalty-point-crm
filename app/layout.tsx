@@ -10,7 +10,7 @@ const anuphan = Anuphan({
 });
 
 export const metadata: Metadata = {
-  title: "Loyalty Point CRM",
+  title: "6CAT Point CRM",
   description: "ระบบจัดการแต้มสะสมและแลกรางวัล",
   viewport: {
     width: "device-width",

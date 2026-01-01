@@ -66,9 +66,9 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
             <div className="flex items-center justify-between">
               <Link href="/customer/dashboard" className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-[#ff4b00] rounded-lg flex items-center justify-center">
-                  <Award className="w-5 h-5 text-white" />
+                  <span className="text-white font-bold text-base">6</span>
                 </div>
-                <span className="font-semibold text-base text-[#1c1d1d]">Loyalty Point</span>
+                <span className="font-semibold text-base text-[#1c1d1d]">6CAT Point</span>
               </Link>
 
               <div className="flex items-center gap-2">
