@@ -149,10 +149,10 @@ export default function UploadSlipPage() {
           });
 
           // Pre-fill form with OCR results
-          if (parsedData.amount) {
+          if (parsedData.amount !== null) {
             setFormData((prev) => ({
               ...prev,
-              amount: parsedData.amount.toString(),
+              amount: parsedData.amount!.toString(),
             }));
           }
           if (parsedData.date) {
