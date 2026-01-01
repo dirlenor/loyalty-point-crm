@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { uploadSlipImage } from "@/lib/supabase/storage";
-import { performOCR } from "@/lib/ocr/tesseract";
-import { parseSlipData } from "@/lib/ocr/parser";
-import { createServerClient } from "@/lib/supabase/server";
 
 /**
  * API endpoint for uploading slip image and processing OCR
@@ -47,50 +44,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Upload image to Supabase Storage
+    // Upload image to Supabase Storage first (don't wait for OCR)
     const { url: imageUrl, path: imagePath } = await uploadSlipImage(
       file,
       customerId
     );
 
-    // Convert file to data URL for OCR
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64 = buffer.toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
-
-    // Perform OCR
-    let ocrResult;
-    let parsedData;
-    try {
-      ocrResult = await performOCR(dataUrl);
-      parsedData = parseSlipData(ocrResult.text, ocrResult.confidence);
-    } catch (ocrError: any) {
-      console.error("OCR error:", ocrError);
-      // Continue even if OCR fails - Admin can review manually
-      ocrResult = {
-        text: "",
-        confidence: 0,
-        data: {},
-      };
-      parsedData = {
-        amount: null,
-        date: null,
-        referenceNumber: null,
-        confidence: 0,
-      };
-    }
-
+    // Return immediately - OCR will be done on client-side
     return NextResponse.json({
       success: true,
       data: {
         imageUrl,
         imagePath,
-        ocr: {
-          rawText: ocrResult.text,
-          confidence: ocrResult.confidence,
-          parsed: parsedData,
-        },
       },
     });
   } catch (error: any) {

@@ -12,6 +12,7 @@ import { findProfileByLineUserId } from "@/app/actions/profiles";
 import { createSlipSubmission } from "@/app/actions/slip-submissions";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { parseSlipData } from "@/lib/ocr/parser";
 
 export default function UploadSlipPage() {
   const router = useRouter();
@@ -25,6 +26,8 @@ export default function UploadSlipPage() {
   const [ocrResult, setOcrResult] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     amount: "",
     date: "",
@@ -74,65 +77,119 @@ export default function UploadSlipPage() {
 
     setSelectedFile(file);
     setOcrResult(null);
+    setOcrProgress(0);
+    setImageUrl(null);
 
     // Create preview
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    reader.onload = async (e) => {
+      const dataUrl = e.target?.result as string;
+      setPreviewUrl(dataUrl);
 
-    // Process OCR
-    setIsProcessing(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("customerId", customer?.id || "");
+      // Upload image first (fast)
+      setIsProcessing(true);
+      setOcrProgress(10);
+      
+      try {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", file);
+        uploadFormData.append("customerId", customer?.id || "");
 
-      const response = await fetch("/api/upload-slip", {
-        method: "POST",
-        body: formData,
-      });
+        const uploadResponse = await fetch("/api/upload-slip", {
+          method: "POST",
+          body: uploadFormData,
+        });
 
-      const result = await response.json();
+        const uploadResult = await uploadResponse.json();
 
-      if (result.success) {
-        setOcrResult(result.data.ocr);
-        // Pre-fill form with OCR results
-        if (result.data.ocr.parsed.amount) {
-          setFormData((prev) => ({
-            ...prev,
-            amount: result.data.ocr.parsed.amount.toString(),
-          }));
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error || "ไม่สามารถอัปโหลดไฟล์ได้");
         }
-        if (result.data.ocr.parsed.date) {
-          setFormData((prev) => ({
-            ...prev,
-            date: result.data.ocr.parsed.date,
-          }));
+
+        setImageUrl(uploadResult.data.imageUrl);
+        setOcrProgress(30);
+
+        // Process OCR in client-side (this may take 10-30 seconds)
+        try {
+          // Dynamic import for Tesseract.js (client-side only)
+          const { createWorker } = await import("tesseract.js");
+          
+          setOcrProgress(40);
+          
+          const worker = await createWorker("tha+eng", 1, {
+            logger: (m: any) => {
+              if (m.status === "recognizing text") {
+                const progress = Math.round(m.progress * 100);
+                setOcrProgress(40 + Math.floor(progress * 0.4)); // 40-80%
+              }
+            },
+          });
+
+          setOcrProgress(50);
+          
+          const {
+            data: { text, confidence },
+          } = await worker.recognize(dataUrl);
+          
+          await worker.terminate();
+          
+          setOcrProgress(80);
+          
+          const ocrResult = {
+            text: text.trim(),
+            confidence: confidence || 0,
+          };
+          
+          const parsedData = parseSlipData(ocrResult.text, ocrResult.confidence);
+          
+          setOcrResult({
+            rawText: ocrResult.text,
+            confidence: ocrResult.confidence,
+            parsed: parsedData,
+          });
+
+          // Pre-fill form with OCR results
+          if (parsedData.amount) {
+            setFormData((prev) => ({
+              ...prev,
+              amount: parsedData.amount.toString(),
+            }));
+          }
+          if (parsedData.date) {
+            setFormData((prev) => ({
+              ...prev,
+              date: parsedData.date || "",
+            }));
+          }
+          if (parsedData.referenceNumber) {
+            setFormData((prev) => ({
+              ...prev,
+              referenceNumber: parsedData.referenceNumber || "",
+            }));
+          }
+
+          setOcrProgress(100);
+        } catch (ocrError: any) {
+          console.error("OCR error:", ocrError);
+          // Continue even if OCR fails - user can fill manually
+          toast({
+            title: "ไม่สามารถอ่านข้อมูลอัตโนมัติได้",
+            description: "กรุณากรอกข้อมูลด้วยตนเอง",
+            variant: "default",
+          });
         }
-        if (result.data.ocr.parsed.referenceNumber) {
-          setFormData((prev) => ({
-            ...prev,
-            referenceNumber: result.data.ocr.parsed.referenceNumber,
-          }));
-        }
-      } else {
+      } catch (error: any) {
         toast({
           title: "เกิดข้อผิดพลาด",
-          description: result.error || "ไม่สามารถประมวลผล OCR ได้",
+          description: error.message || "ไม่สามารถอัปโหลดไฟล์ได้",
           variant: "destructive",
         });
+      } finally {
+        setIsProcessing(false);
+        setOcrProgress(0);
       }
-    } catch (error: any) {
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: error.message || "ไม่สามารถอัปโหลดไฟล์ได้",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async () => {
@@ -155,26 +212,35 @@ export default function UploadSlipPage() {
     setIsSubmitting(true);
 
     try {
-      // Upload file and get image URL
-      const uploadFormData = new FormData();
-      uploadFormData.append("file", selectedFile);
-      uploadFormData.append("customerId", customer.id);
+      // If image not uploaded yet, upload it now
+      let finalImageUrl = imageUrl;
+      if (!finalImageUrl && selectedFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", selectedFile);
+        uploadFormData.append("customerId", customer.id);
 
-      const uploadResponse = await fetch("/api/upload-slip", {
-        method: "POST",
-        body: uploadFormData,
-      });
+        const uploadResponse = await fetch("/api/upload-slip", {
+          method: "POST",
+          body: uploadFormData,
+        });
 
-      const uploadResult = await uploadResponse.json();
+        const uploadResult = await uploadResponse.json();
 
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.error || "ไม่สามารถอัปโหลดไฟล์ได้");
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error || "ไม่สามารถอัปโหลดไฟล์ได้");
+        }
+
+        finalImageUrl = uploadResult.data.imageUrl;
+      }
+
+      if (!finalImageUrl) {
+        throw new Error("ไม่พบ URL ของรูปภาพ");
       }
 
       // Create slip submission
       const result = await createSlipSubmission({
         customerId: customer.id,
-        imageUrl: uploadResult.data.imageUrl,
+        imageUrl: finalImageUrl,
         amount: parseFloat(formData.amount),
         referenceNumber: formData.referenceNumber || null,
         transferDate: formData.date || null,
@@ -279,9 +345,24 @@ export default function UploadSlipPage() {
 
             {/* OCR Processing Status */}
             {isProcessing && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>กำลังประมวลผล OCR...</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>กำลังประมวลผล OCR... ({ocrProgress}%)</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-[#ff4b00] h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${ocrProgress}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {ocrProgress < 30
+                    ? "กำลังอัปโหลดรูปภาพ..."
+                    : ocrProgress < 80
+                    ? "กำลังอ่านข้อมูลจากสลิป..."
+                    : "กำลังประมวลผลข้อมูล..."}
+                </p>
               </div>
             )}
 
