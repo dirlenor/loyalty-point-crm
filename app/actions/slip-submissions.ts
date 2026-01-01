@@ -212,12 +212,26 @@ export async function approveSlipSubmission(
       };
     }
 
+    // Validate reviewer ID exists (or set to null if invalid)
+    let finalReviewerId: string | null = null;
+    if (reviewerId && typeof reviewerId === 'string' && reviewerId !== "00000000-0000-0000-0000-000000000000") {
+      const { data: reviewer } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", reviewerId)
+        .single();
+      
+      if (reviewer) {
+        finalReviewerId = reviewerId;
+      }
+    }
+
     // Update submission status
     const { error: updateError } = await supabase
       .from("slip_submissions")
       .update({
         status: "approved",
-        reviewed_by: reviewerId,
+        reviewed_by: finalReviewerId,
         reviewed_at: new Date().toISOString(),
         points_awarded: pointsToAward,
       })
@@ -299,11 +313,25 @@ export async function rejectSlipSubmission(
   const supabase = createServerClient();
 
   try {
+    // Validate reviewer ID exists (or set to null if invalid)
+    let finalReviewerId: string | null = null;
+    if (reviewerId && typeof reviewerId === 'string' && reviewerId !== "00000000-0000-0000-0000-000000000000") {
+      const { data: reviewer } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", reviewerId)
+        .single();
+      
+      if (reviewer) {
+        finalReviewerId = reviewerId;
+      }
+    }
+
     const { error } = await supabase
       .from("slip_submissions")
       .update({
         status: "rejected",
-        reviewed_by: reviewerId,
+        reviewed_by: finalReviewerId,
         reviewed_at: new Date().toISOString(),
         rejection_reason: reason,
       })

@@ -23,7 +23,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { CheckCircle, XCircle, Eye, Loader2 } from "lucide-react";
-import Image from "next/image";
 
 export default function SlipReviewPage() {
   const { toast } = useToast();
@@ -84,7 +83,8 @@ export default function SlipReviewPage() {
     setIsProcessing(true);
     try {
       // Get admin ID from localStorage or use a default
-      const adminId = "00000000-0000-0000-0000-000000000000"; // TODO: Get from auth
+      // Use null for reviewer ID (will be set to null in server action)
+      const adminId = null as any;
 
       const result = await approveSlipSubmission(
         selectedSubmission.id,
@@ -126,7 +126,8 @@ export default function SlipReviewPage() {
 
     setIsProcessing(true);
     try {
-      const adminId = "00000000-0000-0000-0000-000000000000"; // TODO: Get from auth
+      // Use null for reviewer ID (will be set to null in server action)
+      const adminId = null as any;
 
       const result = await rejectSlipSubmission(
         selectedSubmission.id,
@@ -230,12 +231,14 @@ export default function SlipReviewPage() {
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
                     {/* Image Preview */}
-                    <div className="relative w-24 h-24 rounded-lg overflow-hidden border flex-shrink-0">
-                      <Image
+                    <div className="relative w-24 h-24 rounded-lg overflow-hidden border flex-shrink-0 bg-gray-50">
+                      <img
                         src={submission.image_url}
                         alt="Slip"
-                        fill
-                        className="object-cover"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error("Image load error:", submission.image_url);
+                        }}
                       />
                     </div>
 
@@ -347,12 +350,15 @@ export default function SlipReviewPage() {
                 {/* Slip Image */}
                 <div>
                   <Label>รูปสลิป</Label>
-                  <div className="relative w-full h-64 border rounded-lg overflow-hidden mt-2">
-                    <Image
+                  <div className="relative w-full h-64 border rounded-lg overflow-hidden mt-2 bg-gray-50">
+                    <img
                       src={selectedSubmission.image_url}
                       alt="Slip"
-                      fill
-                      className="object-contain"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        console.error("Image load error:", selectedSubmission.image_url);
+                        (e.target as HTMLImageElement).src = "/placeholder-image.png";
+                      }}
                     />
                   </div>
                 </div>
