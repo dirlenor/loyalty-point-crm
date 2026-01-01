@@ -19,6 +19,11 @@ export async function sendLineMessage({
 }: SendLineMessageParams): Promise<{ success: boolean; error?: string }> {
   const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
+  console.log("=== LINE Notification Debug ===");
+  console.log("Channel Access Token exists:", !!channelAccessToken);
+  console.log("Channel Access Token length:", channelAccessToken?.length || 0);
+  console.log("LINE User ID:", lineUserId);
+
   if (!channelAccessToken) {
     console.error("LINE_CHANNEL_ACCESS_TOKEN is not configured");
     return { success: false, error: "LINE Channel Access Token not configured" };
@@ -30,35 +35,46 @@ export async function sendLineMessage({
   }
 
   try {
+    const requestBody = {
+      to: lineUserId,
+      messages: [
+        {
+          type: "text",
+          text: message,
+        },
+      ],
+    };
+
+    console.log("Sending request to LINE API...");
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
+
     const response = await fetch("https://api.line.me/v2/bot/message/push", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${channelAccessToken}`,
       },
-      body: JSON.stringify({
-        to: lineUserId,
-        messages: [
-          {
-            type: "text",
-            text: message,
-          },
-        ],
-      }),
+      body: JSON.stringify(requestBody),
     });
+
+    console.log("Response status:", response.status);
+    console.log("Response status text:", response.statusText);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("LINE API error:", errorData);
+      console.error("LINE API error:", JSON.stringify(errorData, null, 2));
       return {
         success: false,
-        error: errorData.message || `HTTP ${response.status}`,
+        error: errorData.message || `HTTP ${response.status}: ${response.statusText}`,
       };
     }
 
+    const responseData = await response.json().catch(() => ({}));
+    console.log("LINE API success:", JSON.stringify(responseData, null, 2));
     return { success: true };
   } catch (error: any) {
     console.error("Failed to send LINE message:", error);
+    console.error("Error stack:", error.stack);
     return {
       success: false,
       error: error.message || "Failed to send LINE message",
