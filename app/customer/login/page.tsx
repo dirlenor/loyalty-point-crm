@@ -70,7 +70,9 @@ export default function CustomerLoginPage() {
               description: `ยินดีต้อนรับ ${result.data.full_name || profile.displayName}`,
             });
 
-            router.push("/customer/dashboard");
+            // Use window.location for immediate redirect in LIFF
+            window.location.href = "/customer/dashboard";
+            return; // Exit early to prevent further execution
           } else {
             console.error("Login failed:", result.message);
             toast({
@@ -198,8 +200,8 @@ export default function CustomerLoginPage() {
     );
   }
 
-  // Show processing state
-  if (isProcessing || (isLoggedIn && profile)) {
+  // Show processing state (only while processing, not after success)
+  if (isProcessing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-lg">
