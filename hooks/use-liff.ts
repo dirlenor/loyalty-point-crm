@@ -16,6 +16,7 @@ export interface UseLiffReturn {
   isInitialized: boolean;
   isLoggedIn: boolean;
   error: string | null;
+  debugLogs: string[];
   initLiff: () => Promise<void>;
 }
 
@@ -25,23 +26,34 @@ export function useLiff(): UseLiffReturn {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+
+  const addLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    const logMessage = `[${timestamp}] ${message}`;
+    console.log(logMessage);
+    setDebugLogs((prev) => [...prev, logMessage].slice(-20)); // Keep last 20 logs
+  };
 
   const initLiff = async () => {
     try {
+      addLog("เริ่มต้น LIFF initialization");
       const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
       
       if (!liffId) {
+        addLog("ERROR: LIFF ID ไม่พบ");
         throw new Error("LIFF ID is not configured. Please set NEXT_PUBLIC_LIFF_ID in your environment variables.");
       }
 
-      console.log("Initializing LIFF with ID:", liffId);
+      addLog(`LIFF ID: ${liffId.substring(0, 10)}...`);
 
       // Initialize LIFF with error handling
       try {
+        addLog("กำลังเรียก liff.init()...");
         await liff.init({ liffId });
-        console.log("LIFF initialized successfully");
+        addLog("✓ LIFF initialized สำเร็จ");
       } catch (initError: any) {
-        console.error("LIFF init error:", initError);
+        addLog(`ERROR: LIFF init failed - ${initError.message || initError.code || 'Unknown error'}`);
         // Check for specific error codes
         if (initError.code === "INVALID_LIFF_ID" || initError.message?.includes("400")) {
           throw new Error("LIFF App ID ไม่ถูกต้อง หรือ Endpoint URL ไม่ตรงกับที่ตั้งค่าใน LINE Developers Console. กรุณาตรวจสอบการตั้งค่า LIFF App");
@@ -51,18 +63,19 @@ export function useLiff(): UseLiffReturn {
 
       setLiffInstance(liff);
       setIsInitialized(true);
+      addLog("✓ isInitialized = true");
 
       // Check if user is logged in
       const loggedIn = liff.isLoggedIn();
-      console.log("LIFF logged in status:", loggedIn);
+      addLog(`ตรวจสอบ login status: ${loggedIn ? 'Logged in' : 'Not logged in'}`);
       setIsLoggedIn(loggedIn);
 
       if (loggedIn) {
         // Get LINE profile
         try {
-          console.log("Getting LINE profile...");
+          addLog("กำลังดึง LINE profile...");
           const lineProfile = await liff.getProfile();
-          console.log("LINE profile retrieved:", lineProfile);
+          addLog(`✓ ได้ profile: ${lineProfile.displayName} (${lineProfile.userId.substring(0, 8)}...)`);
           setProfile({
             userId: lineProfile.userId,
             displayName: lineProfile.displayName,
@@ -70,17 +83,18 @@ export function useLiff(): UseLiffReturn {
             statusMessage: lineProfile.statusMessage,
           });
         } catch (profileError: any) {
-          console.error("Get profile error:", profileError);
+          addLog(`ERROR: ไม่สามารถดึง profile - ${profileError.message || 'Unknown error'}`);
           throw new Error("ไม่สามารถดึงข้อมูล LINE Profile ได้. กรุณาตรวจสอบ Scope ที่ตั้งค่าใน LIFF App");
         }
       } else {
         // If not logged in, login
-        console.log("User not logged in, redirecting to login...");
+        addLog("User ยังไม่ login, เรียก liff.login()...");
         // Don't wait for login redirect, it will happen automatically
         liff.login();
+        addLog("✓ liff.login() ถูกเรียกแล้ว (รอ redirect)");
       }
     } catch (err: any) {
-      console.error("LIFF initialization error:", err);
+      addLog(`ERROR: ${err.message || 'Failed to initialize LIFF'}`);
       setError(err.message || "Failed to initialize LIFF");
       setIsInitialized(false);
     }
@@ -99,6 +113,7 @@ export function useLiff(): UseLiffReturn {
     isInitialized,
     isLoggedIn,
     error,
+    debugLogs,
     initLiff,
   };
 }

@@ -11,9 +11,10 @@ import { User, Loader2, AlertCircle } from "lucide-react";
 
 export default function CustomerLoginPage() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  const { liff, profile, isInitialized, isLoggedIn, error: liffError } = useLiff();
+  const { liff, profile, isInitialized, isLoggedIn, error: liffError, debugLogs } = useLiff();
 
   useEffect(() => {
     const handleLiffLogin = async () => {
@@ -110,6 +111,44 @@ export default function CustomerLoginPage() {
               <p className="text-xs text-muted-foreground mt-2">
                 กรุณารอสักครู่...
               </p>
+              
+              {/* Debug Panel */}
+              <div className="w-full mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDebug(!showDebug)}
+                  className="w-full text-xs"
+                >
+                  {showDebug ? "ซ่อน" : "แสดง"} Debug Logs
+                </Button>
+                
+                {showDebug && (
+                  <div className="mt-3 bg-gray-900 text-green-400 p-3 rounded text-xs font-mono max-h-48 overflow-y-auto">
+                    <div className="mb-2 text-yellow-400 font-semibold">Debug Logs:</div>
+                    {debugLogs.length === 0 ? (
+                      <div className="text-gray-500">ยังไม่มี logs...</div>
+                    ) : (
+                      debugLogs.map((log, index) => (
+                        <div key={index} className="mb-1">
+                          {log.includes("ERROR") ? (
+                            <span className="text-red-400">{log}</span>
+                          ) : log.includes("✓") ? (
+                            <span className="text-green-400">{log}</span>
+                          ) : (
+                            <span>{log}</span>
+                          )}
+                        </div>
+                      ))
+                    )}
+                    <div className="mt-2 pt-2 border-t border-gray-700 text-gray-500">
+                      <div>State: initialized={String(isInitialized)}, loggedIn={String(isLoggedIn)}</div>
+                      <div>LIFF ID: {process.env.NEXT_PUBLIC_LIFF_ID ? `${process.env.NEXT_PUBLIC_LIFF_ID.substring(0, 10)}...` : 'Not set'}</div>
+                      <div>URL: {typeof window !== 'undefined' ? window.location.href : 'N/A'}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
