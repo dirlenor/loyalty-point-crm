@@ -270,12 +270,17 @@ export async function findOrCreateProfileByLineUserId(
     }
 
     // Profile doesn't exist, create new one
+    // Generate a unique phone number from LINE User ID for database constraint
+    // Format: LINE-{first 10 chars of userId} to ensure uniqueness
+    const generatedPhone = `LINE-${lineUserId.substring(0, 10).padEnd(10, '0')}`;
+    
     const { data: newProfile, error: createError } = await supabase
       .from("profiles")
       .insert([
         {
           line_user_id: lineUserId,
           full_name: displayName,
+          phone: generatedPhone,
           total_points: 0,
           role: "customer",
         },
