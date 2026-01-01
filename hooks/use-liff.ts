@@ -34,17 +34,12 @@ export function useLiff(): UseLiffReturn {
         throw new Error("LIFF ID is not configured. Please set NEXT_PUBLIC_LIFF_ID in your environment variables.");
       }
 
-      // Check if running in LINE App
-      const isInLine = /Line/i.test(navigator.userAgent) || window.location.href.includes('liff.line.me');
-      
-      if (!isInLine && typeof window !== "undefined") {
-        // If not in LINE App, show helpful message
-        throw new Error("กรุณาเปิดแอปพลิเคชันนี้ผ่าน LINE App เท่านั้น LIFF จะทำงานได้เฉพาะใน LINE App");
-      }
+      console.log("Initializing LIFF with ID:", liffId);
 
       // Initialize LIFF with error handling
       try {
         await liff.init({ liffId });
+        console.log("LIFF initialized successfully");
       } catch (initError: any) {
         console.error("LIFF init error:", initError);
         // Check for specific error codes
@@ -59,12 +54,15 @@ export function useLiff(): UseLiffReturn {
 
       // Check if user is logged in
       const loggedIn = liff.isLoggedIn();
+      console.log("LIFF logged in status:", loggedIn);
       setIsLoggedIn(loggedIn);
 
       if (loggedIn) {
         // Get LINE profile
         try {
+          console.log("Getting LINE profile...");
           const lineProfile = await liff.getProfile();
+          console.log("LINE profile retrieved:", lineProfile);
           setProfile({
             userId: lineProfile.userId,
             displayName: lineProfile.displayName,
@@ -77,6 +75,8 @@ export function useLiff(): UseLiffReturn {
         }
       } else {
         // If not logged in, login
+        console.log("User not logged in, redirecting to login...");
+        // Don't wait for login redirect, it will happen automatically
         liff.login();
       }
     } catch (err: any) {

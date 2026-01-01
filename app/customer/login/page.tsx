@@ -17,13 +17,17 @@ export default function CustomerLoginPage() {
 
   useEffect(() => {
     const handleLiffLogin = async () => {
+      console.log("handleLiffLogin called", { isInitialized, isLoggedIn, hasProfile: !!profile, liffError, isProcessing });
+      
       // Wait for LIFF to initialize
       if (!isInitialized) {
+        console.log("Waiting for LIFF initialization...");
         return;
       }
 
       // If there's an error, show it
       if (liffError) {
+        console.error("LIFF error:", liffError);
         toast({
           title: "เกิดข้อผิดพลาด",
           description: liffError,
@@ -32,13 +36,16 @@ export default function CustomerLoginPage() {
         return;
       }
 
-      // If not logged in, LIFF will handle login automatically
+      // If not logged in, LIFF will handle login automatically (redirect happens)
+      // Just show loading state
       if (!isLoggedIn) {
+        console.log("Not logged in, waiting for redirect...");
         return;
       }
 
       // If we have a profile, process login
       if (profile && !isProcessing) {
+        console.log("Processing login with profile:", profile);
         setIsProcessing(true);
         try {
           const result = await findOrCreateProfileByLineUserId(
@@ -47,6 +54,7 @@ export default function CustomerLoginPage() {
           );
 
           if (result.success && result.data) {
+            console.log("Login successful, saving to localStorage");
             // Save to localStorage for session
             localStorage.setItem("line_user_id", profile.userId);
             localStorage.setItem("customer_id", result.data.id);
@@ -63,6 +71,7 @@ export default function CustomerLoginPage() {
 
             router.push("/customer/dashboard");
           } else {
+            console.error("Login failed:", result.message);
             toast({
               title: "เกิดข้อผิดพลาด",
               description: result.message || "ไม่สามารถเข้าสู่ระบบได้",
@@ -85,15 +94,22 @@ export default function CustomerLoginPage() {
     handleLiffLogin();
   }, [isInitialized, isLoggedIn, profile, liffError, router, toast, isProcessing]);
 
-  // Show loading state while initializing
-  if (!isInitialized) {
+  // Show loading state while initializing or waiting for login
+  if (!isInitialized || (isInitialized && !isLoggedIn && !liffError)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-lg">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
               <Loader2 className="w-8 h-8 animate-spin text-[#ff4b00]" />
-              <p className="text-sm text-muted-foreground">กำลังเชื่อมต่อกับ LINE...</p>
+              <p className="text-sm text-muted-foreground">
+                {!isInitialized 
+                  ? "กำลังเชื่อมต่อกับ LINE..." 
+                  : "กำลังเข้าสู่ระบบ LINE..."}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                กรุณารอสักครู่...
+              </p>
             </div>
           </CardContent>
         </Card>
