@@ -282,9 +282,38 @@ export async function approveSlipSubmission(
         points: pointsToAward,
         source: "slip_verification",
         slip_submission_id: submissionId,
-        created_by: reviewerId,
+        created_by: finalReviewerId,
       },
     ]);
+
+    // Get customer LINE User ID for notification
+    const { data: customerProfile } = await supabase
+      .from("profiles")
+      .select("line_user_id, total_points")
+      .eq("id", submission.customer_id)
+      .single();
+
+    // Send LINE notification if customer has LINE User ID
+    if (customerProfile?.line_user_id) {
+      try {
+        const { sendLineMessage, formatPointsAddedMessage } = await import(
+          "@/lib/line/notify"
+        );
+        const newTotalPoints = (customer.total_points || 0) + pointsToAward;
+        const message = formatPointsAddedMessage(
+          pointsToAward,
+          newTotalPoints,
+          "สลิปเงินโอนของคุณได้รับการอนุมัติแล้ว"
+        );
+        await sendLineMessage({
+          lineUserId: customerProfile.line_user_id,
+          message,
+        });
+      } catch (notifyError) {
+        // Don't fail the whole operation if notification fails
+        console.error("Failed to send LINE notification:", notifyError);
+      }
+    }
 
     revalidatePath("/admin/slip-review");
     revalidatePath("/customer/upload-slip");
