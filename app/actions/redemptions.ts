@@ -2,6 +2,7 @@
 
 import { createServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { generateRedemptionCode } from "@/lib/utils/redemption-code";
 
 export async function getRedemptions() {
   const supabase = createServerClient();
@@ -40,11 +41,102 @@ export async function updateRedemptionStatus(id: string, status: "pending" | "co
     if (error) throw error;
 
     revalidatePath("/admin/redemptions");
+    revalidatePath("/admin/verify-redemption");
     return { success: true, message: "อัปเดตสถานะสำเร็จ" };
   } catch (error: any) {
     return { 
       success: false, 
       message: error.message || "เกิดข้อผิดพลาดในการอัปเดตสถานะ" 
+    };
+  }
+}
+
+/**
+ * Verify redemption code and mark as completed
+ */
+export async function verifyRedemptionCode(code: string) {
+  const supabase = createServerClient();
+
+  try {
+    // Find redemption by code
+    const { data: redemption, error: findError } = await supabase
+      .from("redemptions")
+      .select(`
+        *,
+        profiles:customer_id (
+          id,
+          full_name,
+          phone,
+          line_user_id
+        ),
+        rewards:reward_id (
+          id,
+          title,
+          points_required
+        )
+      `)
+      .eq("redemption_code", code.toUpperCase())
+      .single();
+
+    if (findError || !redemption) {
+      return {
+        success: false,
+        message: "ไม่พบรหัสนี้ กรุณาตรวจสอบรหัสอีกครั้ง",
+        data: null,
+      };
+    }
+
+    // Check if already completed
+    if (redemption.status === "completed") {
+      return {
+        success: false,
+        message: "รหัสนี้ถูกใช้แล้ว",
+        data: redemption,
+      };
+    }
+
+    // Update status to completed
+    const { error: updateError } = await supabase
+      .from("redemptions")
+      .update({
+        status: "completed",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", redemption.id);
+
+    if (updateError) throw updateError;
+
+    // Send LINE notification if customer has LINE User ID
+    if (redemption.profiles?.line_user_id) {
+      try {
+        const { sendLineMessage } = await import("@/lib/line/notify");
+        const message = `✅ คุณได้รับรางวัลแล้ว!\n\n📦 รางวัล: ${redemption.rewards?.title || "ไม่ระบุ"}\n\nขอบคุณที่ใช้บริการ 6CAT Point!`;
+        await sendLineMessage({
+          lineUserId: redemption.profiles.line_user_id,
+          message,
+        });
+      } catch (notifyError) {
+        console.error("Failed to send LINE notification:", notifyError);
+      }
+    }
+
+    revalidatePath("/admin/redemptions");
+    revalidatePath("/admin/verify-redemption");
+    revalidatePath("/customer/history");
+
+    return {
+      success: true,
+      message: "ยืนยันการรับรางวัลสำเร็จ",
+      data: {
+        ...redemption,
+        status: "completed",
+      },
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "เกิดข้อผิดพลาดในการยืนยันรหัส",
+      data: null,
     };
   }
 }
@@ -80,6 +172,27 @@ export async function createRedemption(customerId: string, rewardId: string) {
       return { success: false, message: "แต้มไม่พอสำหรับแลกรางวัลนี้" };
     }
 
+    // Generate unique redemption code
+    let redemptionCode = generateRedemptionCode();
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    // Ensure code is unique
+    while (attempts < maxAttempts) {
+      const { data: existing } = await supabase
+        .from("redemptions")
+        .select("id")
+        .eq("redemption_code", redemptionCode)
+        .single();
+
+      if (!existing) {
+        break; // Code is unique
+      }
+
+      redemptionCode = generateRedemptionCode();
+      attempts++;
+    }
+
     // Create redemption
     const { error: redemptionError } = await supabase
       .from("redemptions")
@@ -87,6 +200,7 @@ export async function createRedemption(customerId: string, rewardId: string) {
         customer_id: customerId,
         reward_id: rewardId,
         status: "pending",
+        redemption_code: redemptionCode,
       }]);
 
     if (redemptionError) throw redemptionError;
@@ -112,6 +226,16 @@ export async function createRedemption(customerId: string, rewardId: string) {
 
     if (stockError) throw stockError;
 
+    // Get redemption data with code
+    const { data: redemptionData } = await supabase
+      .from("redemptions")
+      .select("redemption_code")
+      .eq("customer_id", customerId)
+      .eq("reward_id", rewardId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
     // Get customer LINE User ID and reward title for notification
     const { data: customerProfile } = await supabase
       .from("profiles")
@@ -135,7 +259,8 @@ export async function createRedemption(customerId: string, rewardId: string) {
         const message = formatRedemptionMessage(
           rewardData.title,
           reward.points_required,
-          newTotalPoints
+          newTotalPoints,
+          redemptionData?.redemption_code
         );
         const result = await sendLineMessage({
           lineUserId: customerProfile.line_user_id,

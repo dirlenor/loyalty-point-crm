@@ -106,13 +106,20 @@ export function formatPointsAddedMessage(
 export function formatRedemptionMessage(
   rewardTitle: string,
   pointsUsed: number,
-  remainingPoints: number
+  remainingPoints: number,
+  redemptionCode?: string
 ): string {
   let message = `🎁 คุณแลกรางวัลสำเร็จ!\n\n`;
   message += `📦 รางวัล: ${rewardTitle}\n`;
   message += `➖ ใช้แต้ม: ${pointsUsed.toLocaleString()} แต้ม\n`;
   message += `💰 แต้มคงเหลือ: ${remainingPoints.toLocaleString()} แต้ม\n`;
-  message += `\nขอบคุณที่ใช้บริการ 6CAT Point!`;
+  
+  if (redemptionCode) {
+    message += `\n📱 รหัสรับรางวัล: ${redemptionCode}\n`;
+    message += `กรุณาแสดง QR Code หรือรหัสนี้ที่หน้าร้านเพื่อรับรางวัล`;
+  }
+  
+  message += `\n\nขอบคุณที่ใช้บริการ 6CAT Point!`;
   return message;
 }
 

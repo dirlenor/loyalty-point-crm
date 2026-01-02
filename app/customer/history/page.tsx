@@ -5,15 +5,26 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { CustomerLayout } from "@/components/customer-layout";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Gift } from "lucide-react";
+import { Gift, QrCode } from "lucide-react";
 import { findProfileByLineUserId } from "@/app/actions/profiles";
 import { getCustomerRedemptions } from "@/app/actions/customer-redemptions";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function CustomerHistoryPage() {
   const [redemptions, setRedemptions] = useState<any[]>([]);
   const [customer, setCustomer] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRedemption, setSelectedRedemption] = useState<any>(null);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -124,12 +135,78 @@ export default function CustomerHistoryPage() {
                         {redemption.rewards?.points_required || 0} แต้ม
                       </span>
                     </div>
+                    {redemption.redemption_code && redemption.status === "pending" && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedRedemption(redemption);
+                            setQrDialogOpen(true);
+                          }}
+                          className="text-xs"
+                        >
+                          <QrCode className="w-3 h-3 mr-1" />
+                          แสดง QR Code
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          รหัส: <span className="font-mono font-semibold">{redemption.redemption_code}</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        {/* QR Code Dialog */}
+        <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>QR Code สำหรับรับรางวัล</DialogTitle>
+              <DialogDescription>
+                แสดง QR Code นี้ที่หน้าร้านเพื่อรับรางวัล
+              </DialogDescription>
+            </DialogHeader>
+            {selectedRedemption && (
+              <div className="space-y-4">
+                {/* QR Code */}
+                <div className="flex justify-center p-4 bg-white rounded-lg border">
+                  <QRCodeSVG
+                    value={selectedRedemption.redemption_code || ""}
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                  />
+                </div>
+
+                {/* Redemption Code */}
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">รหัสรับรางวัล</p>
+                  <p className="text-2xl font-mono font-bold text-[#ff4b00]">
+                    {selectedRedemption.redemption_code}
+                  </p>
+                </div>
+
+                {/* Reward Info */}
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm font-medium mb-1">
+                    {selectedRedemption.rewards?.title || "ไม่ระบุ"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    ใช้แต้ม: {selectedRedemption.rewards?.points_required || 0} แต้ม
+                  </p>
+                </div>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  กรุณาแสดง QR Code หรือรหัสนี้ที่หน้าร้านเพื่อรับรางวัล
+                </p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </CustomerLayout>
   );
