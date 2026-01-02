@@ -59,8 +59,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || 
-              (item.href !== "/" && pathname?.startsWith(item.href));
+            // Check if current path matches exactly or is a child path
+            // But exclude parent paths when on specific child routes
+            let isActive = pathname === item.href;
+            
+            // For non-root paths, check if it's a child path
+            // But only if it's not a demo-topup submenu (to avoid highlighting parent)
+            if (!isActive && item.href !== "/") {
+              if (item.href === "/admin/demo-topup") {
+                // Only highlight "Demo Topup" if we're exactly on that page
+                isActive = pathname === "/admin/demo-topup";
+              } else {
+                // For other paths, allow child path matching
+                isActive = pathname?.startsWith(item.href + "/") || pathname === item.href;
+              }
+            }
             
             return (
               <Link
@@ -132,8 +145,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <nav className="p-4 space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || 
-                  (item.href !== "/" && pathname?.startsWith(item.href));
+                // Check if current path matches exactly or is a child path
+                // But exclude parent paths when on specific child routes
+                let isActive = pathname === item.href;
+                
+                // For non-root paths, check if it's a child path
+                // But only if it's not a demo-topup submenu (to avoid highlighting parent)
+                if (!isActive && item.href !== "/") {
+                  if (item.href === "/admin/demo-topup") {
+                    // Only highlight "Demo Topup" if we're exactly on that page
+                    isActive = pathname === "/admin/demo-topup";
+                  } else {
+                    // For other paths, allow child path matching
+                    isActive = pathname?.startsWith(item.href + "/") || pathname === item.href;
+                  }
+                }
                 
                 return (
                   <Link
