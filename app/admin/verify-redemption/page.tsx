@@ -19,9 +19,9 @@ export default function VerifyRedemptionPage() {
   const [verificationResult, setVerificationResult] = useState<any>(null);
 
   const handleVerify = async () => {
-    if (!code.trim()) {
+    if (!code.trim() || code.length !== 6) {
       toast({
-        title: "กรุณากรอกรหัส",
+        title: "กรุณากรอกรหัส 6 ตัวอักษร",
         variant: "destructive",
       });
       return;
@@ -31,7 +31,9 @@ export default function VerifyRedemptionPage() {
     setVerificationResult(null);
 
     try {
-      const result = await verifyRedemptionCode(code.trim().toUpperCase());
+      // Add RD- prefix
+      const fullCode = `RD-${code.trim().toUpperCase()}`;
+      const result = await verifyRedemptionCode(fullCode);
 
       if (result.success) {
         setVerificationResult(result.data);
@@ -88,19 +90,28 @@ export default function VerifyRedemptionPage() {
               <div className="space-y-2">
                 <Label htmlFor="code">รหัสรับรางวัล</Label>
                 <div className="flex gap-2">
-                  <Input
-                    id="code"
-                    type="text"
-                    placeholder="RD-XXXXXX"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    onKeyPress={handleKeyPress}
-                    className="font-mono text-lg tracking-wider"
-                    autoFocus
-                  />
+                  <div className="flex items-center border border-input rounded-md bg-background flex-1">
+                    <span className="px-3 py-2 text-lg font-mono text-muted-foreground border-r border-input">
+                      RD-
+                    </span>
+                    <Input
+                      id="code"
+                      type="text"
+                      placeholder="XXXXXX"
+                      value={code}
+                      onChange={(e) => {
+                        // Only allow alphanumeric, max 6 characters
+                        const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+                        setCode(value);
+                      }}
+                      onKeyPress={handleKeyPress}
+                      className="font-mono text-lg tracking-wider border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                      autoFocus
+                    />
+                  </div>
                   <Button
                     onClick={handleVerify}
-                    disabled={isVerifying || !code.trim()}
+                    disabled={isVerifying || !code.trim() || code.length !== 6}
                     className="bg-[#ff4b00] hover:bg-[#ff4b00]/90"
                   >
                     {isVerifying ? (
@@ -111,7 +122,7 @@ export default function VerifyRedemptionPage() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  กด Enter เพื่อยืนยัน
+                  กด Enter เพื่อยืนยัน (กรอก 6 ตัวอักษร)
                 </p>
               </div>
 
