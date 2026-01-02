@@ -105,51 +105,65 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           })}
 
           {/* Topup Menu with Dropdown */}
-          <div className="mt-1">
-            <button
-              onClick={() => setTopupMenuOpen(!topupMenuOpen)}
-              className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
-                isTopupMenuActive
-                  ? "bg-[#ff4b00] text-white shadow-sm"
-                  : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
-              )}
-            >
-              <Wallet className="w-5 h-5 flex-shrink-0" />
-              <span className="text-sm font-medium flex-1 text-left">ระบบ Topup</span>
-              {topupMenuOpen ? (
-                <ChevronDown className="w-4 h-4 flex-shrink-0" />
-              ) : (
-                <ChevronRight className="w-4 h-4 flex-shrink-0" />
-              )}
-            </button>
+          {(() => {
+            // Check if any submenu is active
+            const isAnySubmenuActive = topupSubmenuItems.some(
+              (subItem) => pathname === subItem.href || pathname?.startsWith(subItem.href + "/")
+            );
             
-            {/* Submenu */}
-            {topupMenuOpen && (
-              <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
-                {topupSubmenuItems.map((subItem) => {
-                  const SubIcon = subItem.icon;
-                  const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
-                  
-                  return (
-                    <Link
-                      key={subItem.href}
-                      href={subItem.href}
-                      className={cn(
-                        "flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 text-sm",
-                        isSubActive
-                          ? "bg-[#ff4b00] text-white shadow-sm"
-                          : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
-                      )}
-                    >
-                      <SubIcon className="w-4 h-4 flex-shrink-0" />
-                      <span className="font-medium">{subItem.label}</span>
-                    </Link>
-                  );
-                })}
+            // Only highlight parent if no submenu is active (i.e., on exact /admin/demo-topup page)
+            const isParentActive = pathname === "/admin/demo-topup" && !isAnySubmenuActive;
+            
+            return (
+              <div className="mt-1">
+                <button
+                  onClick={() => setTopupMenuOpen(!topupMenuOpen)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
+                    isParentActive
+                      ? "bg-[#ff4b00] text-white shadow-sm"
+                      : isTopupMenuActive && !isAnySubmenuActive
+                      ? "bg-[#fff5f0] text-[#ff4b00]"
+                      : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
+                  )}
+                >
+                  <Wallet className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm font-medium flex-1 text-left">ระบบ Topup</span>
+                  {topupMenuOpen ? (
+                    <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                  )}
+                </button>
+                
+                {/* Submenu */}
+                {topupMenuOpen && (
+                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
+                    {topupSubmenuItems.map((subItem) => {
+                      const SubIcon = subItem.icon;
+                      const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
+                      
+                      return (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 text-sm",
+                            isSubActive
+                              ? "bg-[#ff4b00] text-white shadow-sm"
+                              : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
+                          )}
+                        >
+                          <SubIcon className="w-4 h-4 flex-shrink-0" />
+                          <span className="font-medium">{subItem.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
         </nav>
       </aside>
 
@@ -229,51 +243,65 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               })}
 
               {/* Topup Menu for Mobile */}
-              <div className="mt-1">
-                <button
-                  onClick={() => setTopupMenuOpen(!topupMenuOpen)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
-                    isTopupMenuActive
-                      ? "bg-[#ff4b00] text-white"
-                      : "text-[#6b7280] hover:bg-[#f9fafb]"
-                  )}
-                >
-                  <Wallet className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm font-medium flex-1 text-left">ระบบ Topup</span>
-                  {topupMenuOpen ? (
-                    <ChevronDown className="w-4 h-4 flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4 flex-shrink-0" />
-                  )}
-                </button>
+              {(() => {
+                // Check if any submenu is active
+                const isAnySubmenuActive = topupSubmenuItems.some(
+                  (subItem) => pathname === subItem.href || pathname?.startsWith(subItem.href + "/")
+                );
                 
-                {topupMenuOpen && (
-                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
-                    {topupSubmenuItems.map((subItem) => {
-                      const SubIcon = subItem.icon;
-                      const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
-                      
-                      return (
-                        <Link
-                          key={subItem.href}
-                          href={subItem.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={cn(
-                            "flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm",
-                            isSubActive
-                              ? "bg-[#ff4b00] text-white"
-                              : "text-[#6b7280] hover:bg-[#f9fafb]"
-                          )}
-                        >
-                          <SubIcon className="w-4 h-4 flex-shrink-0" />
-                          <span className="font-medium">{subItem.label}</span>
-                        </Link>
-                      );
-                    })}
+                // Only highlight parent if no submenu is active
+                const isParentActive = pathname === "/admin/demo-topup" && !isAnySubmenuActive;
+                
+                return (
+                  <div className="mt-1">
+                    <button
+                      onClick={() => setTopupMenuOpen(!topupMenuOpen)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+                        isParentActive
+                          ? "bg-[#ff4b00] text-white"
+                          : isTopupMenuActive && !isAnySubmenuActive
+                          ? "bg-[#fff5f0] text-[#ff4b00]"
+                          : "text-[#6b7280] hover:bg-[#f9fafb]"
+                      )}
+                    >
+                      <Wallet className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm font-medium flex-1 text-left">ระบบ Topup</span>
+                      {topupMenuOpen ? (
+                        <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                      )}
+                    </button>
+                    
+                    {topupMenuOpen && (
+                      <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
+                        {topupSubmenuItems.map((subItem) => {
+                          const SubIcon = subItem.icon;
+                          const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
+                          
+                          return (
+                            <Link
+                              key={subItem.href}
+                              href={subItem.href}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={cn(
+                                "flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm",
+                                isSubActive
+                                  ? "bg-[#ff4b00] text-white"
+                                  : "text-[#6b7280] hover:bg-[#f9fafb]"
+                              )}
+                            >
+                              <SubIcon className="w-4 h-4 flex-shrink-0" />
+                              <span className="font-medium">{subItem.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
             </nav>
           </div>
         )}
