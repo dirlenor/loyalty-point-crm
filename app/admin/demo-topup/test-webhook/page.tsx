@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Send, CheckCircle } from "lucide-react";
 
-export default function TestWebhookPage() {
+function TestWebhookContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState("");
@@ -28,6 +28,7 @@ export default function TestWebhookPage() {
     if (orderIdParam) setOrderId(orderIdParam);
     if (transactionIdParam) setTransactionId(transactionIdParam);
     if (amountParam) setAmount(amountParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const handleSendWebhook = async () => {
@@ -287,7 +288,7 @@ export default function TestWebhookPage() {
               </li>
               <li>คัดลอก Order ID และ Transaction ID จาก Order ที่สร้าง</li>
               <li>กรอกข้อมูลในฟอร์มด้านบน</li>
-              <li>กด "ส่ง Webhook" เพื่อจำลองการชำระเงิน</li>
+              <li>กด &quot;ส่ง Webhook&quot; เพื่อจำลองการชำระเงิน</li>
               <li>ตรวจสอบผลลัพธ์และ Order Status</li>
             </ol>
           </CardContent>
@@ -297,3 +298,18 @@ export default function TestWebhookPage() {
   );
 }
 
+export default function TestWebhookPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <div className="p-4 md:p-8">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        </div>
+      </DashboardLayout>
+    }>
+      <TestWebhookContent />
+    </Suspense>
+  );
+}

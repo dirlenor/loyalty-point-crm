@@ -25,6 +25,7 @@ export default function AdminDemoTopupOrdersPage() {
 
   useEffect(() => {
     loadOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
   const loadOrders = async () => {
