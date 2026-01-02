@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History, FileCheck, ScanLine, QrCode } from "lucide-react";
+import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History, FileCheck, ScanLine, QrCode, Wallet, ChevronDown, ChevronRight, ListOrdered } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { getPendingSlipCount } from "@/app/actions/slip-submissions";
@@ -15,6 +15,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pendingSlipCount, setPendingSlipCount] = useState(0);
+  const [topupMenuOpen, setTopupMenuOpen] = useState(false);
 
   useEffect(() => {
     const loadPendingCount = async () => {
@@ -35,11 +36,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { href: "/admin/verify-redemption", label: "ยืนยันรับรางวัล", icon: ScanLine },
     { href: "/admin/slip-review", label: "ตรวจสอบสลิป", icon: FileCheck, badge: true },
     { href: "/admin/history", label: "ประวัติทั้งหมด", icon: History },
-    { href: "/admin/demo-topup", label: "Demo Topup", icon: QrCode },
-    { href: "/admin/demo-topup/orders", label: "Demo Orders", icon: ShoppingBag },
-    { href: "/admin/demo-topup/test-webhook", label: "Test Webhook", icon: QrCode },
     { href: "/store", label: "ร้านรางวัล", icon: Award },
   ];
+
+  // Topup submenu items
+  const topupSubmenuItems = [
+    { href: "/admin/demo-topup", label: "Demo Topup", icon: QrCode },
+    { href: "/admin/demo-topup/orders", label: "Demo Orders", icon: ListOrdered },
+    { href: "/admin/demo-topup/test-webhook", label: "Test Webhook", icon: QrCode },
+  ];
+
+  // Check if any topup submenu is active
+  const isTopupMenuActive = pathname?.startsWith("/admin/demo-topup");
+  
+  // Auto-open topup menu if on a topup page
+  useEffect(() => {
+    if (isTopupMenuActive) {
+      setTopupMenuOpen(true);
+    }
+  }, [isTopupMenuActive]);
 
   return (
     <div className="min-h-screen bg-[#f5f7fa] flex">
@@ -60,19 +75,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             // Check if current path matches exactly or is a child path
-            // But exclude parent paths when on specific child routes
             let isActive = pathname === item.href;
             
             // For non-root paths, check if it's a child path
-            // But only if it's not a demo-topup submenu (to avoid highlighting parent)
             if (!isActive && item.href !== "/") {
-              if (item.href === "/admin/demo-topup") {
-                // Only highlight "Demo Topup" if we're exactly on that page
-                isActive = pathname === "/admin/demo-topup";
-              } else {
-                // For other paths, allow child path matching
-                isActive = pathname?.startsWith(item.href + "/") || pathname === item.href;
-              }
+              isActive = pathname?.startsWith(item.href + "/") || pathname === item.href;
             }
             
             return (
@@ -96,6 +103,53 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Link>
             );
           })}
+
+          {/* Topup Menu with Dropdown */}
+          <div className="mt-1">
+            <button
+              onClick={() => setTopupMenuOpen(!topupMenuOpen)}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
+                isTopupMenuActive
+                  ? "bg-[#ff4b00] text-white shadow-sm"
+                  : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
+              )}
+            >
+              <Wallet className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium flex-1 text-left">ระบบ Topup</span>
+              {topupMenuOpen ? (
+                <ChevronDown className="w-4 h-4 flex-shrink-0" />
+              ) : (
+                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+              )}
+            </button>
+            
+            {/* Submenu */}
+            {topupMenuOpen && (
+              <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
+                {topupSubmenuItems.map((subItem) => {
+                  const SubIcon = subItem.icon;
+                  const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
+                  
+                  return (
+                    <Link
+                      key={subItem.href}
+                      href={subItem.href}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 text-sm",
+                        isSubActive
+                          ? "bg-[#ff4b00] text-white shadow-sm"
+                          : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
+                      )}
+                    >
+                      <SubIcon className="w-4 h-4 flex-shrink-0" />
+                      <span className="font-medium">{subItem.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </nav>
       </aside>
 
@@ -145,20 +199,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <nav className="p-4 space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                // Check if current path matches exactly or is a child path
-                // But exclude parent paths when on specific child routes
                 let isActive = pathname === item.href;
                 
-                // For non-root paths, check if it's a child path
-                // But only if it's not a demo-topup submenu (to avoid highlighting parent)
                 if (!isActive && item.href !== "/") {
-                  if (item.href === "/admin/demo-topup") {
-                    // Only highlight "Demo Topup" if we're exactly on that page
-                    isActive = pathname === "/admin/demo-topup";
-                  } else {
-                    // For other paths, allow child path matching
-                    isActive = pathname?.startsWith(item.href + "/") || pathname === item.href;
-                  }
+                  isActive = pathname?.startsWith(item.href + "/") || pathname === item.href;
                 }
                 
                 return (
@@ -183,6 +227,53 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   </Link>
                 );
               })}
+
+              {/* Topup Menu for Mobile */}
+              <div className="mt-1">
+                <button
+                  onClick={() => setTopupMenuOpen(!topupMenuOpen)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+                    isTopupMenuActive
+                      ? "bg-[#ff4b00] text-white"
+                      : "text-[#6b7280] hover:bg-[#f9fafb]"
+                  )}
+                >
+                  <Wallet className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm font-medium flex-1 text-left">ระบบ Topup</span>
+                  {topupMenuOpen ? (
+                    <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                  )}
+                </button>
+                
+                {topupMenuOpen && (
+                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
+                    {topupSubmenuItems.map((subItem) => {
+                      const SubIcon = subItem.icon;
+                      const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
+                      
+                      return (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm",
+                            isSubActive
+                              ? "bg-[#ff4b00] text-white"
+                              : "text-[#6b7280] hover:bg-[#f9fafb]"
+                          )}
+                        >
+                          <SubIcon className="w-4 h-4 flex-shrink-0" />
+                          <span className="font-medium">{subItem.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </nav>
           </div>
         )}
