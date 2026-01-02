@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Award, Home, ShoppingBag, LogOut, User, Upload } from "lucide-react";
+import { Award, Home, ShoppingBag, LogOut, User, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -39,6 +39,7 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
     { href: "/customer/store", label: "ร้านรางวัล", icon: Award },
     { href: "/customer/upload-slip", label: "อัปโหลดสลิป", icon: Upload },
     { href: "/customer/history", label: "ประวัติ", icon: ShoppingBag },
+    { href: "/customer/demo-wallet", label: "Demo Wallet", icon: Wallet },
   ];
 
   return (
@@ -109,7 +110,7 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
 
         {/* Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e4e4e4] z-50 max-w-md mx-auto shadow-lg">
-          <div className="grid grid-cols-4">
+          <div className="grid grid-cols-5">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;

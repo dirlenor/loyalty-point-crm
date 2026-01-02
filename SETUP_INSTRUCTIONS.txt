@@ -1,0 +1,158 @@
+╔══════════════════════════════════════════════════════════════╗
+║     คู่มือตั้งค่าระบบ Demo Topup - แบบละเอียด                ║
+╚══════════════════════════════════════════════════════════════╝
+
+📋 สารบัญ:
+1. สร้างไฟล์ .env.local
+2. เพิ่ม Environment Variables
+3. Restart Server
+4. ทดสอบระบบ
+
+═══════════════════════════════════════════════════════════════
+
+📝 ขั้นตอนที่ 1: สร้างไฟล์ .env.local
+
+1. เปิด Terminal (หรือ Command Prompt)
+2. ไปที่โฟลเดอร์โปรเจค:
+   cd "/Users/apple/Desktop/CRM - Reward Point"
+
+3. สร้างไฟล์ .env.local:
+   touch .env.local
+
+   หรือสร้างด้วย Text Editor:
+   - เปิด Text Editor (เช่น VS Code, TextEdit)
+   - สร้างไฟล์ใหม่ชื่อ ".env.local"
+   - เก็บไว้ในโฟลเดอร์ root ของโปรเจค
+
+═══════════════════════════════════════════════════════════════
+
+📝 ขั้นตอนที่ 2: เพิ่ม Environment Variables
+
+เปิดไฟล์ .env.local และเพิ่มข้อมูลนี้:
+
+─────────────────────────────────────────────────────────────
+DEMO_MODE=true
+DEMO_ENABLED=true
+PROMPTPAY_API_KEY=test_demo_key_12345
+PROMPTPAY_API_SECRET=test_demo_secret_67890
+PROMPTPAY_SANDBOX_URL=https://sandbox-api.promptpay.com
+PROMPTPAY_WEBHOOK_SECRET=test_webhook_secret_abc123
+DEMO_POINT_RATE=1
+DEMO_QR_EXPIRY_MINUTES=15
+─────────────────────────────────────────────────────────────
+
+⚠️ หมายเหตุ:
+- ข้อมูลเหล่านี้เป็น test values สำหรับทดสอบ
+- ไม่ต้องมี PromptPay API Key จริง
+- ระบบจะใช้ Mock Response อัตโนมัติ
+
+═══════════════════════════════════════════════════════════════
+
+📝 ขั้นตอนที่ 3: Restart Development Server
+
+1. ถ้า server กำลังรันอยู่:
+   - กด Ctrl+C ใน Terminal เพื่อหยุด
+
+2. รัน server ใหม่:
+   npm run dev
+
+3. รอจนเห็นข้อความ:
+   "Ready - started server on 0.0.0.0:3000"
+
+═══════════════════════════════════════════════════════════════
+
+📝 ขั้นตอนที่ 4: ทดสอบระบบ
+
+🎯 4.1 สร้าง Topup Order
+
+1. เปิดเบราว์เซอร์ไปที่:
+   http://localhost:3000/admin/demo-topup
+
+2. หา Profile ID:
+   - ไปที่ http://localhost:3000/admin/customers
+   - เลือกลูกค้าใดก็ได้
+   - คัดลอก ID (UUID) ของลูกค้า
+
+3. สร้าง Order:
+   - วาง Profile ID ในช่อง "User ID"
+   - กรอกจำนวนเงิน: 100
+   - กด "สร้าง QR Code"
+
+4. คัดลอกข้อมูล:
+   - Order ID (เช่น DEMO-20241215-ABC12)
+   - Transaction ID (เช่น txn_demo_...)
+
+─────────────────────────────────────────────────────────────
+
+🎯 4.2 ทดสอบ Webhook
+
+1. ไปที่:
+   http://localhost:3000/admin/demo-topup/test-webhook
+
+2. กรอกข้อมูล:
+   - Order ID: วาง Order ID ที่คัดลอกไว้
+   - Transaction ID: วาง Transaction ID ที่คัดลอกไว้
+   - จำนวนเงิน: 100 (ต้องตรงกับ Order)
+
+3. กด "ส่ง Webhook"
+
+4. ดูผลลัพธ์:
+   - ควรเห็น "สำเร็จ (Status: 200)"
+   - ข้อความ "Webhook processed successfully"
+
+─────────────────────────────────────────────────────────────
+
+🎯 4.3 ตรวจสอบผลลัพธ์
+
+1. ดู Order Status:
+   - ไปที่ http://localhost:3000/admin/demo-topup/orders
+   - Order ที่สร้างไว้ควรมีสถานะ "สำเร็จ" ✅
+
+2. ดู Demo Wallet:
+   - ไปที่ http://localhost:3000/customer/demo-wallet
+   - ควรเห็นแต้ม 100 แต้ม ✅
+
+═══════════════════════════════════════════════════════════════
+
+✅ Checklist
+
+- [ ] สร้างไฟล์ .env.local แล้ว
+- [ ] เพิ่ม Environment Variables แล้ว
+- [ ] Restart server แล้ว
+- [ ] สร้าง Topup Order สำเร็จ
+- [ ] ส่ง Webhook สำเร็จ
+- [ ] แต้มถูกเพิ่มใน Demo Wallet
+
+═══════════════════════════════════════════════════════════════
+
+❓ ปัญหาที่พบบ่อย
+
+Q: ไม่เห็นเมนู "Demo Topup"
+→ ตรวจสอบว่า .env.local มี DEMO_MODE=true
+→ Restart server
+
+Q: "Demo mode is not enabled"
+→ ตรวจสอบว่า DEMO_MODE=true และ DEMO_ENABLED=true
+→ Restart server
+
+Q: Webhook ไม่ทำงาน
+→ ตรวจสอบว่า Order ID และ Transaction ID ถูกต้อง
+→ ดู Console Logs ใน Terminal
+
+Q: แต้มไม่ถูกเพิ่ม
+→ ตรวจสอบว่า Webhook ส่งสำเร็จ (Status 200)
+→ ตรวจสอบ Order Status ว่าเป็น "success"
+
+═══════════════════════════════════════════════════════════════
+
+📚 เอกสารเพิ่มเติม
+
+- คู่มือฉบับเต็ม: DEMO_TOPUP_SETUP.md
+- Quick Start: QUICK_START_DEMO.md
+
+═══════════════════════════════════════════════════════════════
+
+🎉 พร้อมทดสอบแล้ว!
+
+เริ่มต้นด้วยการสร้างไฟล์ .env.local และทำตามขั้นตอนที่ 1-4
+

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History, FileCheck, ScanLine } from "lucide-react";
+import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History, FileCheck, ScanLine, QrCode } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { getPendingSlipCount } from "@/app/actions/slip-submissions";
@@ -35,6 +35,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { href: "/admin/verify-redemption", label: "ยืนยันรับรางวัล", icon: ScanLine },
     { href: "/admin/slip-review", label: "ตรวจสอบสลิป", icon: FileCheck, badge: true },
     { href: "/admin/history", label: "ประวัติทั้งหมด", icon: History },
+    { href: "/admin/demo-topup", label: "Demo Topup", icon: QrCode },
+    { href: "/admin/demo-topup/orders", label: "Demo Orders", icon: ShoppingBag },
+    { href: "/admin/demo-topup/test-webhook", label: "Test Webhook", icon: QrCode },
     { href: "/store", label: "ร้านรางวัล", icon: Award },
   ];
 
