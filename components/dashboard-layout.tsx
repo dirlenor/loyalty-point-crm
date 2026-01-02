@@ -141,7 +141,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
                     {topupSubmenuItems.map((subItem) => {
                       const SubIcon = subItem.icon;
-                      const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
+                      // Check exact match first, then check if it's a child path
+                      // But exclude parent path /admin/demo-topup when checking submenu
+                      let isSubActive = pathname === subItem.href;
+                      
+                      // For submenu items, only match exact path or direct child paths
+                      // Don't match parent path
+                      if (!isSubActive && subItem.href !== "/admin/demo-topup") {
+                        isSubActive = pathname?.startsWith(subItem.href + "/") || pathname === subItem.href;
+                      }
+                      
+                      // Special case: /admin/demo-topup should only be active when exactly on that page
+                      if (subItem.href === "/admin/demo-topup") {
+                        isSubActive = pathname === "/admin/demo-topup";
+                      }
                       
                       return (
                         <Link
@@ -278,7 +291,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#e5e7eb] pl-2">
                         {topupSubmenuItems.map((subItem) => {
                           const SubIcon = subItem.icon;
-                          const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href + "/");
+                          // Check exact match first
+                          let isSubActive = pathname === subItem.href;
+                          
+                          // For submenu items, only match exact path or direct child paths
+                          // Don't match parent path
+                          if (!isSubActive && subItem.href !== "/admin/demo-topup") {
+                            isSubActive = pathname?.startsWith(subItem.href + "/") || pathname === subItem.href;
+                          }
+                          
+                          // Special case: /admin/demo-topup should only be active when exactly on that page
+                          if (subItem.href === "/admin/demo-topup") {
+                            isSubActive = pathname === "/admin/demo-topup";
+                          }
                           
                           return (
                             <Link
