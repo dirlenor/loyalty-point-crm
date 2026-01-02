@@ -320,20 +320,26 @@ export async function processPaymentWebhook(
       .eq("id", order.demo_user_id)
       .single();
 
+    let newTotalPoints = 0;
+    let lineUserId: string | null = null;
+
     if (!demoUserError && demoUser?.profile_id) {
-      // Get current points from profile
+      // Get current points and line_user_id from profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("total_points")
+        .select("total_points, line_user_id")
         .eq("id", demoUser.profile_id)
         .single();
 
       if (!profileError && profile) {
+        newTotalPoints = (profile.total_points || 0) + order.points_to_add;
+        lineUserId = profile.line_user_id;
+
         // Update real profile points
         const { error: updateProfileError } = await supabase
           .from("profiles")
           .update({
-            total_points: (profile.total_points || 0) + order.points_to_add,
+            total_points: newTotalPoints,
           })
           .eq("id", demoUser.profile_id);
 
@@ -344,6 +350,34 @@ export async function processPaymentWebhook(
           console.log(`Added ${order.points_to_add} points to profile ${demoUser.profile_id}`);
         }
       }
+    }
+
+    // Send LINE notification if customer has LINE User ID
+    if (lineUserId) {
+      try {
+        const { sendLineMessage, formatPointsAddedMessage } = await import("@/lib/line/notify");
+        const message = formatPointsAddedMessage(
+          order.points_to_add,
+          newTotalPoints,
+          `เติมเงิน ${order.amount} บาท`
+        );
+        const result = await sendLineMessage({
+          lineUserId,
+          message,
+        });
+
+        if (result.success) {
+          console.log("LINE notification sent successfully for topup");
+        } else {
+          console.error("Failed to send LINE notification:", result.error);
+          // Don't fail the whole operation
+        }
+      } catch (notifyError: any) {
+        console.error("Error sending LINE notification:", notifyError);
+        // Don't fail the whole operation
+      }
+    } else {
+      console.log("No LINE User ID found, skipping notification");
     }
 
     revalidatePath("/admin/demo-topup");
