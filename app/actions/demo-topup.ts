@@ -313,8 +313,43 @@ export async function processPaymentWebhook(
       // Don't fail the whole operation
     }
 
+    // Add points to real profile (total_points)
+    const { data: demoUser, error: demoUserError } = await supabase
+      .from("demo_users")
+      .select("profile_id")
+      .eq("id", order.demo_user_id)
+      .single();
+
+    if (!demoUserError && demoUser?.profile_id) {
+      // Get current points from profile
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("total_points")
+        .eq("id", demoUser.profile_id)
+        .single();
+
+      if (!profileError && profile) {
+        // Update real profile points
+        const { error: updateProfileError } = await supabase
+          .from("profiles")
+          .update({
+            total_points: (profile.total_points || 0) + order.points_to_add,
+          })
+          .eq("id", demoUser.profile_id);
+
+        if (updateProfileError) {
+          console.error("Error updating profile points:", updateProfileError);
+          // Don't fail the whole operation, but log it
+        } else {
+          console.log(`Added ${order.points_to_add} points to profile ${demoUser.profile_id}`);
+        }
+      }
+    }
+
     revalidatePath("/admin/demo-topup");
     revalidatePath("/customer/demo-wallet");
+    revalidatePath("/admin/customers");
+    revalidatePath("/customer/dashboard");
 
     return {
       success: true,
