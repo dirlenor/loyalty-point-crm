@@ -12,26 +12,56 @@ export async function getDemoWallet(userId: string) {
   DEMO_CONFIG.validateDemoMode();
 
   try {
-    // Find demo user
+    // Find demo user by profile_id first
     const { data: demoUser, error: userError } = await supabase
       .from("demo_users")
-      .select("id")
-      .or(`profile_id.eq.${userId},id.eq.${userId}`)
+      .select("id, profile_id")
+      .eq("profile_id", userId)
       .single();
 
     if (userError || !demoUser) {
-      return {
-        success: false,
-        message: "ไม่พบ demo user",
-        data: null,
-      };
+      // If not found by profile_id, try by id
+      const { data: demoUserById, error: userByIdError } = await supabase
+        .from("demo_users")
+        .select("id, profile_id")
+        .eq("id", userId)
+        .single();
+
+      if (userByIdError || !demoUserById) {
+        console.log("Demo user not found for userId:", userId);
+        return {
+          success: false,
+          message: "ไม่พบ demo user กรุณาสร้าง Topup Order ก่อน",
+          data: null,
+        };
+      }
+
+      // Use demo user found by id
+      const wallet = await getWalletForDemoUser(demoUserById.id, supabase);
+      return wallet;
     }
+
+    // Use demo user found by profile_id
+    const wallet = await getWalletForDemoUser(demoUser.id, supabase);
+    return wallet;
+  } catch (error: any) {
+    console.error("Error in getDemoWallet:", error);
+    return {
+      success: false,
+      message: error.message || "เกิดข้อผิดพลาดในการดึงข้อมูล wallet",
+      data: null,
+    };
+  }
+}
+
+async function getWalletForDemoUser(demoUserId: string, supabase: any) {
+  try {
 
     // Get wallet
     const { data: wallet, error: walletError } = await supabase
       .from("demo_wallets")
       .select("*")
-      .eq("demo_user_id", demoUser.id)
+      .eq("demo_user_id", demoUserId)
       .single();
 
     if (walletError) {
@@ -39,7 +69,7 @@ export async function getDemoWallet(userId: string) {
       const { data: newWallet, error: createError } = await supabase
         .from("demo_wallets")
         .insert({
-          demo_user_id: demoUser.id,
+          demo_user_id: demoUserId,
           balance: 0,
         })
         .select()
@@ -50,7 +80,7 @@ export async function getDemoWallet(userId: string) {
       return {
         success: true,
         data: {
-          userId: demoUser.id,
+          userId: demoUserId,
           balance: 0,
           totalTopups: 0,
           totalPointsEarned: 0,
@@ -62,28 +92,25 @@ export async function getDemoWallet(userId: string) {
     const { data: orders, error: ordersError } = await supabase
       .from("demo_topup_orders")
       .select("points_to_add, status")
-      .eq("demo_user_id", demoUser.id)
+      .eq("demo_user_id", demoUserId)
       .eq("status", "success");
 
     const totalTopups = orders?.length || 0;
     const totalPointsEarned =
-      orders?.reduce((sum, o) => sum + (o.points_to_add || 0), 0) || 0;
+      orders?.reduce((sum: number, o: any) => sum + (o.points_to_add || 0), 0) || 0;
 
     return {
       success: true,
       data: {
-        userId: demoUser.id,
+        userId: demoUserId,
         balance: wallet.balance || 0,
         totalTopups,
         totalPointsEarned,
       },
     };
   } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || "เกิดข้อผิดพลาดในการดึงข้อมูล wallet",
-      data: null,
-    };
+    console.error("Error in getWalletForDemoUser:", error);
+    throw error;
   }
 }
 

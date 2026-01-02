@@ -9,9 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet, Plus, History, Loader2 } from "lucide-react";
 import { findProfileByLineUserId } from "@/app/actions/profiles";
 import { getDemoWallet, getDemoWalletHistory } from "@/app/actions/demo-wallet";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 export default function CustomerDemoWalletPage() {
+  const { toast } = useToast();
   const [wallet, setWallet] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,11 +35,12 @@ export default function CustomerDemoWalletPage() {
           return;
         }
 
-        // Get demo wallet - try profile_id first, then customer id
+        // Get demo wallet using profile_id
         let walletResult = await getDemoWallet(customerResult.data.id);
         
-        // If not found, try to find by creating demo user
+        // If not found, try to find or create demo user
         if (!walletResult.success || !walletResult.data) {
+          console.log("Demo wallet not found, creating demo user...");
           // Try to find or create demo user
           const { findOrCreateDemoUser } = await import("@/app/actions/demo-topup");
           const demoUserResult = await findOrCreateDemoUser(
@@ -47,15 +50,24 @@ export default function CustomerDemoWalletPage() {
           );
           
           if (demoUserResult.success && demoUserResult.data) {
-            // Try again with demo user id
-            walletResult = await getDemoWallet(demoUserResult.data.id);
+            console.log("Demo user created/found, fetching wallet again...");
+            // Try again with profile_id (not demo user id)
+            walletResult = await getDemoWallet(customerResult.data.id);
           }
         }
         
         if (walletResult.success && walletResult.data) {
+          console.log("Wallet loaded:", walletResult.data);
           setWallet(walletResult.data);
         } else {
           console.error("Failed to get demo wallet:", walletResult);
+          // Show error message to user
+          const errorMessage = "message" in walletResult ? walletResult.message : "กรุณาสร้าง Topup Order ก่อน";
+          toast({
+            title: "ไม่พบ Demo Wallet",
+            description: errorMessage,
+            variant: "destructive",
+          });
         }
 
         // Get history

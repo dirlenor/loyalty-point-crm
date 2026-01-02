@@ -27,8 +27,9 @@ export async function GET(
     const result = await getDemoWallet(userId);
 
     if (!result.success) {
+      const message = "message" in result ? result.message : "ไม่พบ wallet";
       return NextResponse.json(
-        { success: false, message: result.message },
+        { success: false, message },
         { status: 404 }
       );
     }
