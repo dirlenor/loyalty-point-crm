@@ -133,8 +133,8 @@ export default function HistoryPage() {
         <Card className="bg-white border-0 shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#fff5f0] rounded-lg flex items-center justify-center">
-                <History className="w-5 h-5 text-[#ff4b00]" />
+              <div className="w-10 h-10 bg-[green-50] rounded-lg flex items-center justify-center">
+                <History className="w-5 h-5 text-[#00D084]" />
               </div>
               <div>
                 <CardTitle className="text-xl font-semibold text-[#1c1d1d]">ประวัติทั้งหมด</CardTitle>
@@ -154,7 +154,7 @@ export default function HistoryPage() {
                   onClick={() => setFilter(option.value)}
                   className={`${
                     filter === option.value
-                      ? "bg-[#ff4b00] text-white hover:bg-[#ff4b00]/90"
+                      ? "bg-[#00D084] text-white hover:bg-[#00D084]/90"
                       : "bg-white text-[#6b7280] hover:bg-[#f9fafb]"
                   }`}
                 >
@@ -175,7 +175,7 @@ export default function HistoryPage() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-[#ff4b00]" />
+                <Loader2 className="w-6 h-6 animate-spin text-[#00D084]" />
               </div>
             ) : paginatedItems.length === 0 ? (
               <div className="text-center py-12 text-[#6b7280]">
@@ -298,7 +298,7 @@ export default function HistoryPage() {
                                 onClick={() => setCurrentPage(page)}
                                 className={
                                   currentPage === page
-                                    ? "bg-[#ff4b00] text-white hover:bg-[#ff4b00]/90"
+                                    ? "bg-[#00D084] text-white hover:bg-[#00D084]/90"
                                     : "bg-white"
                                 }
                               >

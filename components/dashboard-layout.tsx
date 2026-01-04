@@ -63,8 +63,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Logo Section */}
         <div className="p-6 border-b border-[#e5e7eb] flex-shrink-0">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#ff4b00] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">6</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+              <img 
+                src="/asset/Group 23.png" 
+                alt="6CAT Point Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <span className="font-bold text-xl text-[#1c1d1d]">6CAT Point</span>
           </Link>
@@ -89,7 +93,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
                   isActive
-                    ? "bg-[#ff4b00] text-white shadow-sm"
+                    ? "bg-[#00D084] text-white shadow-sm"
                     : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
                 )}
               >
@@ -121,9 +125,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
                     isParentActive
-                      ? "bg-[#ff4b00] text-white shadow-sm"
+                      ? "bg-[#00D084] text-white shadow-sm"
                       : isTopupMenuActive && !isAnySubmenuActive
-                      ? "bg-[#fff5f0] text-[#ff4b00]"
+                      ? "bg-green-50 text-[#00D084]"
                       : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
                   )}
                 >
@@ -163,7 +167,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                           className={cn(
                             "flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 text-sm",
                             isSubActive
-                              ? "bg-[#ff4b00] text-white shadow-sm"
+                              ? "bg-[#00D084] text-white shadow-sm"
                               : "text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1c1d1d]"
                           )}
                         >
@@ -240,7 +244,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
                       isActive
-                        ? "bg-[#ff4b00] text-white"
+                        ? "bg-[#00D084] text-white"
                         : "text-[#6b7280] hover:bg-[#f9fafb]"
                     )}
                   >
@@ -272,9 +276,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
                         isParentActive
-                          ? "bg-[#ff4b00] text-white"
+                          ? "bg-[#00D084] text-white"
                           : isTopupMenuActive && !isAnySubmenuActive
-                          ? "bg-[#fff5f0] text-[#ff4b00]"
+                          ? "bg-green-50 text-[#00D084]"
                           : "text-[#6b7280] hover:bg-[#f9fafb]"
                       )}
                     >
@@ -313,7 +317,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                               className={cn(
                                 "flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm",
                                 isSubActive
-                                  ? "bg-[#ff4b00] text-white"
+                                  ? "bg-[#00D084] text-white"
                                   : "text-[#6b7280] hover:bg-[#f9fafb]"
                               )}
                             >

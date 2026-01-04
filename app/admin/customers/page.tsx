@@ -220,8 +220,8 @@ export default function CustomersPage() {
           <Card className="bg-white border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#fff5f0] rounded-xl flex items-center justify-center">
-                  <Users className="w-6 h-6 text-[#ff4b00]" />
+                <div className="w-12 h-12 bg-[green-50] rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-[#00D084]" />
                 </div>
               </div>
               <div>
@@ -234,13 +234,13 @@ export default function CustomersPage() {
           <Card className="bg-white border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#fff5f0] rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-[#ff4b00]" />
+                <div className="w-12 h-12 bg-[green-50] rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-[#00D084]" />
                 </div>
               </div>
               <div>
                 <p className="text-sm text-[#6b7280] mb-1">แต้มรวมทั้งหมด</p>
-                <p className="text-3xl font-bold text-[#ff4b00]">
+                <p className="text-3xl font-bold text-[#00D084]">
                   {customers.reduce((sum, c) => sum + (c.total_points || 0), 0).toLocaleString()}
                 </p>
               </div>
@@ -250,8 +250,8 @@ export default function CustomersPage() {
           <Card className="bg-white border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#fff5f0] rounded-xl flex items-center justify-center">
-                  <UserCircle className="w-6 h-6 text-[#ff4b00]" />
+                <div className="w-12 h-12 bg-[green-50] rounded-xl flex items-center justify-center">
+                  <UserCircle className="w-6 h-6 text-[#00D084]" />
                 </div>
               </div>
               <div>
@@ -268,8 +268,8 @@ export default function CustomersPage() {
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#fff5f0] rounded-lg flex items-center justify-center">
-                  <User className="w-5 h-5 text-[#ff4b00]" />
+                <div className="w-10 h-10 bg-[green-50] rounded-lg flex items-center justify-center">
+                  <User className="w-5 h-5 text-[#00D084]" />
                 </div>
                 <div>
                   <CardTitle className="text-xl font-semibold text-[#1c1d1d]">สมาชิก</CardTitle>
@@ -291,7 +291,7 @@ export default function CustomersPage() {
                         setSearchPhone(value);
                       }
                     }}
-                    className="pl-9 w-64 border-[#e5e7eb] focus:border-[#ff4b00]"
+                    className="pl-9 w-64 border-[#e5e7eb] focus:border-[#00D084]"
                     maxLength={10}
                   />
                 </div>
@@ -340,7 +340,7 @@ export default function CustomersPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-[#ff4b00]">
+                            <span className="text-lg font-bold text-[#00D084]">
                               {customer.total_points?.toLocaleString() || 0}
                             </span>
                             <span className="text-sm text-[#6b7280]">แต้ม</span>
@@ -358,7 +358,7 @@ export default function CustomersPage() {
                                 setPointsToAdd("");
                                 setAddPointsDialogOpen(true);
                               }}
-                              className="gap-1 bg-[#ff4b00] hover:bg-[#ff4b00]/90 text-white"
+                              className="gap-1 bg-[#00D084] hover:bg-[#00D084]/90 text-white"
                             >
                               <Plus className="w-4 h-4" />
                               เพิ่มแต้ม
@@ -434,7 +434,7 @@ export default function CustomersPage() {
                     }
                   }}
                   min="1"
-                  className="border-[#e5e7eb] focus:border-[#ff4b00]"
+                  className="border-[#e5e7eb] focus:border-[#00D084]"
                 />
               </div>
             </div>
@@ -454,7 +454,7 @@ export default function CustomersPage() {
               <Button 
                 onClick={handleAddPoints} 
                 disabled={isProcessing || !pointsToAdd || parseInt(pointsToAdd) <= 0}
-                className="bg-[#ff4b00] hover:bg-[#ff4b00]/90 text-white"
+                className="bg-[#00D084] hover:bg-[#00D084]/90 text-white"
               >
                 {isProcessing ? "กำลังเพิ่ม..." : "เพิ่มแต้ม"}
               </Button>
@@ -479,7 +479,7 @@ export default function CustomersPage() {
                   placeholder="กรุณากรอกชื่อ-นามสกุล"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="border-[#e5e7eb] focus:border-[#ff4b00]"
+                  className="border-[#e5e7eb] focus:border-[#00D084]"
                 />
               </div>
               <div className="space-y-2">
@@ -496,7 +496,7 @@ export default function CustomersPage() {
                     }
                   }}
                   maxLength={10}
-                  className="border-[#e5e7eb] focus:border-[#ff4b00]"
+                  className="border-[#e5e7eb] focus:border-[#00D084]"
                 />
               </div>
             </div>
@@ -515,7 +515,7 @@ export default function CustomersPage() {
               <Button 
                 onClick={handleUpdateCustomer} 
                 disabled={isProcessing || !editName.trim()}
-                className="bg-[#ff4b00] hover:bg-[#ff4b00]/90 text-white"
+                className="bg-[#00D084] hover:bg-[#00D084]/90 text-white"
               >
                 {isProcessing ? "กำลังบันทึก..." : "บันทึก"}
               </Button>

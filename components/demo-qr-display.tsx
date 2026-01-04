@@ -45,7 +45,7 @@ export function DemoQrDisplay({
     <Card className="bg-white border-0 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <QrCode className="w-5 h-5 text-[#ff4b00]" />
+          <QrCode className="w-5 h-5 text-[#00D084]" />
           QR Code สำหรับชำระเงิน
         </CardTitle>
         <CardDescription>
@@ -73,7 +73,7 @@ export function DemoQrDisplay({
         <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">จำนวนเงิน:</span>
-            <span className="text-lg font-bold text-[#ff4b00]">
+            <span className="text-lg font-bold text-[#00D084]">
               {amount.toLocaleString()} บาท
             </span>
           </div>

@@ -68,8 +68,12 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <Link href="/customer/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#ff4b00] rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-base">6</span>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="/asset/Group 23.png" 
+                    alt="6CAT Point Logo" 
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <span className="font-semibold text-base text-[#1c1d1d]">6CAT Point</span>
               </Link>
@@ -81,7 +85,7 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
                       <p className="text-xs font-medium text-[#1c1d1d] truncate max-w-[100px]">
                         {customerName}
                       </p>
-                      <p className="text-xs text-[#ff4b00] font-semibold">
+                      <p className="text-xs text-[#00D084] font-semibold">
                         {customerPoints.toLocaleString()} แต้ม
                       </p>
                     </div>
@@ -122,7 +126,7 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
                   className={cn(
                     "flex flex-col items-center justify-center py-3 transition-colors",
                     isActive
-                      ? "text-[#ff4b00] bg-orange-50"
+                      ? "text-[#00D084] bg-green-50"
                       : "text-[#727272]"
                   )}
                 >

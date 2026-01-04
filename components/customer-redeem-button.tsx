@@ -151,7 +151,7 @@ export function CustomerRedeemButton({ reward }: CustomerRedeemButtonProps) {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">แต้มหลังแลก</p>
-                  <p className="text-lg font-semibold text-[#ff4b00]">
+                  <p className="text-lg font-semibold text-[#00D084]">
                     {(customer.total_points || 0) - reward.points_required} แต้ม
                   </p>
                 </div>

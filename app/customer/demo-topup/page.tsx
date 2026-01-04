@@ -188,7 +188,7 @@ export default function CustomerDemoTopupPage() {
               <Button
                 onClick={handleCreateTopup}
                 disabled={isCreating || !amount || parseFloat(amount) <= 0}
-                className="w-full bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+                className="w-full bg-[#00D084] hover:bg-[#00D084]/90"
               >
                 {isCreating ? (
                   <>

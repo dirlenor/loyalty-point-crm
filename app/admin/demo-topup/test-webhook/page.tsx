@@ -171,7 +171,7 @@ function TestWebhookContent() {
               <Button
                 onClick={handleSendWebhook}
                 disabled={isSending || !orderId.trim() || !transactionId.trim()}
-                className="w-full bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+                className="w-full bg-[#00D084] hover:bg-[#00D084]/90"
               >
                 {isSending ? (
                   <>

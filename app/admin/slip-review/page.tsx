@@ -201,7 +201,7 @@ export default function SlipReviewPage() {
           <Button
             variant={statusFilter === "pending" ? "default" : "outline"}
             onClick={() => setStatusFilter("pending")}
-            className="bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+            className="bg-[#00D084] hover:bg-[#00D084]/90"
           >
             รอตรวจสอบ
           </Button>
@@ -267,7 +267,7 @@ export default function SlipReviewPage() {
                         </div>
                         <div>
                           <span className="text-[#6b7280]">แต้มที่จะได้รับ: </span>
-                          <span className="font-medium text-[#ff4b00]">
+                          <span className="font-medium text-[#00D084]">
                             {submission.points_awarded || 0} แต้ม
                           </span>
                         </div>
@@ -295,7 +295,7 @@ export default function SlipReviewPage() {
                           <Button
                             size="sm"
                             onClick={() => handleViewSubmission(submission)}
-                            className="bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+                            className="bg-[#00D084] hover:bg-[#00D084]/90"
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             ตรวจสอบ
@@ -341,7 +341,7 @@ export default function SlipReviewPage() {
                   </p>
                   <p className="text-sm text-[#6b7280]">
                     แต้มปัจจุบัน:{" "}
-                    <span className="font-medium text-[#ff4b00]">
+                    <span className="font-medium text-[#00D084]">
                       {selectedSubmission.customer?.total_points || 0} แต้ม
                     </span>
                   </p>
@@ -445,7 +445,7 @@ export default function SlipReviewPage() {
               <Button
                 onClick={handleApprove}
                 disabled={isProcessing}
-                className="bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+                className="bg-[#00D084] hover:bg-[#00D084]/90"
               >
                 {isProcessing ? (
                   <>

@@ -104,7 +104,7 @@ export default function CustomerLoginPage() {
         <Card className="w-full max-w-md shadow-lg">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-[#ff4b00]" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#00D084]" />
               <p className="text-sm text-muted-foreground">
                 {!isInitialized 
                   ? "กำลังเชื่อมต่อกับ LINE..." 
@@ -207,7 +207,7 @@ export default function CustomerLoginPage() {
         <Card className="w-full max-w-md shadow-lg">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-[#ff4b00]" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#00D084]" />
               <p className="text-sm text-muted-foreground">กำลังเข้าสู่ระบบ...</p>
             </div>
           </CardContent>
@@ -221,7 +221,7 @@ export default function CustomerLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-[#ff4b00] rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-[#00D084] rounded-full flex items-center justify-center mb-4">
             <User className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold">เข้าสู่ระบบ</CardTitle>

@@ -75,7 +75,7 @@ export default function CustomerStorePage() {
       <CardHeader>
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg">{reward.title}</CardTitle>
-          <div className="flex items-center gap-1 text-[#ff4b00] font-semibold">
+          <div className="flex items-center gap-1 text-[#00D084] font-semibold">
             <Award className="h-4 w-4" />
             <span>{reward.points_required}</span>
           </div>
@@ -122,16 +122,16 @@ export default function CustomerStorePage() {
         </div>
 
         {/* Points Display */}
-        <Card className="mb-6 border-2 border-[#ff4b00] bg-gradient-to-br from-orange-50 to-red-50">
+        <Card className="mb-6 border-2 border-[#00D084] bg-gradient-to-br from-green-50 to-red-50">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">แต้มสะสมของคุณ</p>
-                <p className="text-3xl font-bold text-[#ff4b00]">
+                <p className="text-3xl font-bold text-[#00D084]">
                   {customer.total_points?.toLocaleString() || 0} แต้ม
                 </p>
               </div>
-              <div className="w-16 h-16 bg-[#ff4b00] rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-[#00D084] rounded-full flex items-center justify-center">
                 <Award className="w-8 h-8 text-white" />
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function CustomerStorePage() {
         {/* Rewards Grid */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-1 h-6 bg-[#ff4b00] rounded-full"></div>
+            <div className="w-1 h-6 bg-[#00D084] rounded-full"></div>
             <h2 className="text-xl font-bold text-[#211c37]">
               รางวัลทั้งหมด ({rewards.length})
             </h2>

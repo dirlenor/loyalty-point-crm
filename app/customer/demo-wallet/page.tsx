@@ -108,7 +108,7 @@ export default function CustomerDemoWalletPage() {
         </div>
 
         {/* Wallet Balance Card */}
-        <Card className="bg-gradient-to-br from-[#ff4b00] to-[#ff6b2b] text-white mb-4">
+        <Card className="bg-gradient-to-br from-[#00D084] to-[#ff6b2b] text-white mb-4">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -149,7 +149,7 @@ export default function CustomerDemoWalletPage() {
         <div className="flex gap-2 mb-6">
           <Button
             onClick={() => router.push("/customer/demo-topup")}
-            className="flex-1 bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+            className="flex-1 bg-[#00D084] hover:bg-[#00D084]/90"
           >
             <Plus className="w-4 h-4 mr-2" />
             เติมเงิน

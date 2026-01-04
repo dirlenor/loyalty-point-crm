@@ -131,7 +131,7 @@ export default function CustomerHistoryPage() {
                         {format(new Date(redemption.created_at), "dd/MM/yyyy HH:mm")}
                       </span>
                       <span>•</span>
-                      <span className="text-[#ff4b00] font-semibold">
+                      <span className="text-[#00D084] font-semibold">
                         {redemption.rewards?.points_required || 0} แต้ม
                       </span>
                     </div>
@@ -185,7 +185,7 @@ export default function CustomerHistoryPage() {
                 {/* Redemption Code */}
                 <div className="text-center space-y-2">
                   <p className="text-sm text-muted-foreground">รหัสรับรางวัล</p>
-                  <p className="text-2xl font-mono font-bold text-[#ff4b00]">
+                  <p className="text-2xl font-mono font-bold text-[#00D084]">
                     {selectedRedemption.redemption_code}
                   </p>
                 </div>

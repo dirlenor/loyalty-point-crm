@@ -352,7 +352,7 @@ export default function UploadSlipPage() {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-[#ff4b00] h-2 rounded-full transition-all duration-300"
+                    className="bg-[#00D084] h-2 rounded-full transition-all duration-300"
                     style={{ width: `${ocrProgress}%` }}
                   ></div>
                 </div>
@@ -444,7 +444,7 @@ export default function UploadSlipPage() {
                 <Button
                   onClick={handleSubmit}
                   disabled={isSubmitting || !formData.amount}
-                  className="w-full bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+                  className="w-full bg-[#00D084] hover:bg-[#00D084]/90"
                 >
                   {isSubmitting ? (
                     <>

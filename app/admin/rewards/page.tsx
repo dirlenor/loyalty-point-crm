@@ -24,8 +24,8 @@ export default async function ManageRewardsPage() {
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#fff5f0] rounded-lg flex items-center justify-center">
-                  <Gift className="w-5 h-5 text-[#ff4b00]" />
+                <div className="w-10 h-10 bg-[green-50] rounded-lg flex items-center justify-center">
+                  <Gift className="w-5 h-5 text-[#00D084]" />
                 </div>
                 <div>
                   <CardTitle className="text-xl font-semibold text-[#1c1d1d]">จัดการรางวัล</CardTitle>
@@ -33,7 +33,7 @@ export default async function ManageRewardsPage() {
                 </div>
               </div>
               <RewardDialog>
-                <Button className="bg-[#ff4b00] hover:bg-[#ff4b00]/90 text-white gap-2">
+                <Button className="bg-[#00D084] hover:bg-[#00D084]/90 text-white gap-2">
                   <Plus className="w-4 h-4" />
                   เพิ่มรางวัล
                 </Button>
@@ -64,7 +64,7 @@ export default async function ManageRewardsPage() {
                         <TableCell className="font-medium text-[#1c1d1d]">{reward.title}</TableCell>
                         <TableCell className="text-[#6b7280]">{reward.description || "-"}</TableCell>
                         <TableCell>
-                          <span className="font-semibold text-[#ff4b00]">{reward.points_required} แต้ม</span>
+                          <span className="font-semibold text-[#00D084]">{reward.points_required} แต้ม</span>
                         </TableCell>
                         <TableCell>
                           <span className={reward.stock === 0 ? "text-red-500 font-semibold" : "text-[#6b7280]"}>

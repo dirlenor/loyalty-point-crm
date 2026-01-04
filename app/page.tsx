@@ -17,8 +17,8 @@ export default async function HomePage() {
           <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#fff5f0] rounded-xl flex items-center justify-center">
-                  <Users className="w-6 h-6 text-[#ff4b00]" />
+                <div className="w-12 h-12 bg-[green-50] rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-[#00D084]" />
                 </div>
               </div>
               <div>
@@ -31,8 +31,8 @@ export default async function HomePage() {
           <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#fff5f0] rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-[#ff4b00]" />
+                <div className="w-12 h-12 bg-[green-50] rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-[#00D084]" />
                 </div>
               </div>
               <div>
@@ -45,8 +45,8 @@ export default async function HomePage() {
           <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#fff5f0] rounded-xl flex items-center justify-center">
-                  <ShoppingBag className="w-6 h-6 text-[#ff4b00]" />
+                <div className="w-12 h-12 bg-[green-50] rounded-xl flex items-center justify-center">
+                  <ShoppingBag className="w-6 h-6 text-[#00D084]" />
                 </div>
               </div>
               <div>
@@ -59,8 +59,8 @@ export default async function HomePage() {
           <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#fff5f0] rounded-xl flex items-center justify-center">
-                  <Gift className="w-6 h-6 text-[#ff4b00]" />
+                <div className="w-12 h-12 bg-[green-50] rounded-xl flex items-center justify-center">
+                  <Gift className="w-6 h-6 text-[#00D084]" />
                 </div>
               </div>
               <div>
@@ -77,7 +77,7 @@ export default async function HomePage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold text-[#1c1d1d]">รายการแลกรางวัลล่าสุด</CardTitle>
               <Link href="/admin/redemptions">
-                <Button variant="ghost" size="sm" className="text-[#6b7280] hover:text-[#ff4b00]">
+                <Button variant="ghost" size="sm" className="text-[#6b7280] hover:text-[#00D084]">
                   ดูทั้งหมด
                 </Button>
               </Link>
@@ -93,8 +93,8 @@ export default async function HomePage() {
                     key={redemption.id}
                     className="flex items-center gap-4 p-4 rounded-lg bg-[#f9fafb] hover:bg-[#f3f4f6] transition-colors border border-transparent hover:border-[#e5e7eb]"
                   >
-                    <div className="w-12 h-12 bg-[#fff5f0] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Gift className="w-6 h-6 text-[#ff4b00]" />
+                    <div className="w-12 h-12 bg-[green-50] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Gift className="w-6 h-6 text-[#00D084]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[#1c1d1d] mb-1">
@@ -109,7 +109,7 @@ export default async function HomePage() {
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-[#ff4b00]">
+                        <p className="text-sm font-semibold text-[#00D084]">
                           {redemption.rewards?.points_required || 0} แต้ม
                         </p>
                         <span
@@ -136,7 +136,7 @@ export default async function HomePage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold text-[#1c1d1d]">รางวัลล่าสุด</CardTitle>
               <Link href="/admin/rewards">
-                <Button variant="ghost" size="sm" className="text-[#6b7280] hover:text-[#ff4b00]">
+                <Button variant="ghost" size="sm" className="text-[#6b7280] hover:text-[#00D084]">
                   ดูทั้งหมด
                 </Button>
               </Link>
@@ -152,7 +152,7 @@ export default async function HomePage() {
                 stats.recentRewards.map((reward: any) => (
                   <div
                     key={reward.id}
-                    className="bg-[#f9fafb] border border-[#e5e7eb] rounded-xl p-4 hover:shadow-md transition-all hover:border-[#ff4b00]/20"
+                    className="bg-[#f9fafb] border border-[#e5e7eb] rounded-xl p-4 hover:shadow-md transition-all hover:border-[#00D084]/20"
                   >
                     {reward.image_url && (
                       <div className="aspect-video w-full mb-3 rounded-lg overflow-hidden bg-gray-100">
@@ -167,7 +167,7 @@ export default async function HomePage() {
                       {reward.title}
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-[#ff4b00]">
+                      <span className="text-xs font-semibold text-[#00D084]">
                         {reward.points_required} แต้ม
                       </span>
                       <span

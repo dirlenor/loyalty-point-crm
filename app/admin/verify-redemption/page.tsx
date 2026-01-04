@@ -112,7 +112,7 @@ export default function VerifyRedemptionPage() {
                   <Button
                     onClick={handleVerify}
                     disabled={isVerifying || !code.trim() || code.length !== 6}
-                    className="bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+                    className="bg-[#00D084] hover:bg-[#00D084]/90"
                   >
                     {isVerifying ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -204,9 +204,9 @@ export default function VerifyRedemptionPage() {
                   </div>
 
                   {/* Redemption Code */}
-                  <div className="p-4 bg-orange-50 rounded-lg">
+                  <div className="p-4 bg-green-50 rounded-lg">
                     <p className="text-xs text-muted-foreground mb-1">รหัสรับรางวัล</p>
-                    <p className="text-2xl font-mono font-bold text-[#ff4b00]">
+                    <p className="text-2xl font-mono font-bold text-[#00D084]">
                       {verificationResult.redemption_code}
                     </p>
                   </div>

@@ -82,16 +82,16 @@ export default function CustomerDashboardPage() {
         </div>
 
         {/* Points Card */}
-        <Card className="mb-6 border-2 border-[#ff4b00] shadow-lg bg-gradient-to-br from-orange-50 to-red-50">
+        <Card className="mb-6 border-2 border-[#00D084] shadow-lg bg-gradient-to-br from-green-50 to-red-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Award className="w-6 h-6 text-[#ff4b00]" />
+              <Award className="w-6 h-6 text-[#00D084]" />
               แต้มสะสมของคุณ
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center">
-              <div className="text-5xl font-bold text-[#ff4b00] mb-2">
+              <div className="text-5xl font-bold text-[#00D084] mb-2">
                 {customer.total_points?.toLocaleString() || 0}
               </div>
               <p className="text-lg text-muted-foreground">แต้ม</p>
@@ -110,13 +110,13 @@ export default function CustomerDashboardPage() {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-6 bg-[#ff4b00] rounded-full"></div>
+                  <div className="w-1 h-6 bg-[#00D084] rounded-full"></div>
                   <h2 className="text-xl font-bold text-[#211c37]">
                     รางวัลที่สามารถแลกได้ ({availableRewards.length})
                   </h2>
                 </div>
                 <Link href="/customer/store">
-                  <Button variant="ghost" size="sm" className="text-[#ff4b00]">
+                  <Button variant="ghost" size="sm" className="text-[#00D084]">
                     ดูทั้งหมด
                   </Button>
                 </Link>
@@ -124,7 +124,7 @@ export default function CustomerDashboardPage() {
               <div className="grid grid-cols-2 gap-3">
                 {availableRewards.slice(0, 4).map((reward) => (
                   <Link key={reward.id} href="/customer/store">
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow border-2 border-[#ff4b00]">
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow border-2 border-[#00D084]">
                       {reward.image_url && (
                         <div className="aspect-video w-full overflow-hidden bg-muted">
                           <img
@@ -139,7 +139,7 @@ export default function CustomerDashboardPage() {
                           {reward.title}
                         </h3>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-[#ff4b00] font-semibold">
+                          <span className="text-xs text-[#00D084] font-semibold">
                             {reward.points_required} แต้ม
                           </span>
                           <span className="text-xs text-green-600 font-semibold">
@@ -221,7 +221,7 @@ export default function CustomerDashboardPage() {
                           {format(new Date(redemption.created_at), "dd/MM/yyyy HH:mm")}
                         </span>
                         <span>•</span>
-                        <span className="text-[#ff4b00] font-semibold">
+                        <span className="text-[#00D084] font-semibold">
                           {redemption.rewards?.points_required || 0} แต้ม
                         </span>
                       </div>

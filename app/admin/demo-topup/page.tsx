@@ -168,7 +168,7 @@ export default function AdminDemoTopupPage() {
               <Button
                 onClick={handleCreateTopup}
                 disabled={isCreating || !userId.trim() || !amount}
-                className="w-full bg-[#ff4b00] hover:bg-[#ff4b00]/90"
+                className="w-full bg-[#00D084] hover:bg-[#00D084]/90"
               >
                 {isCreating ? (
                   <>
