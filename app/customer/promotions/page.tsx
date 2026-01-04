@@ -77,7 +77,7 @@ export default function CustomerPromotionsPage() {
       }}
     >
       {promotion.image_url && (
-        <div className="aspect-video w-full overflow-hidden bg-muted">
+        <div className="aspect-square w-full overflow-hidden bg-muted">
           <img
             src={promotion.image_url}
             alt={promotion.title}
@@ -85,10 +85,10 @@ export default function CustomerPromotionsPage() {
           />
         </div>
       )}
-      <CardHeader>
-        <CardTitle className="text-lg">{promotion.title}</CardTitle>
+      <CardHeader className="p-3">
+        <CardTitle className="text-sm font-semibold line-clamp-2">{promotion.title}</CardTitle>
         {promotion.description && (
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
             {promotion.description}
           </p>
         )}
@@ -126,7 +126,7 @@ export default function CustomerPromotionsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {promotions.map((promotion) => (
                 <PromotionCard key={promotion.id} promotion={promotion} />
               ))}
