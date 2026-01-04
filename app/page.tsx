@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDashboardStats } from "@/app/actions/stats";
-import { Gift, Users, ShoppingBag, TrendingUp, Megaphone } from "lucide-react";
+import { Gift, Users, ShoppingBag, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PromotionCarousel } from "@/components/promotion-carousel";
 
 export default async function HomePage() {
   const stats = await getDashboardStats();
@@ -13,30 +12,6 @@ export default async function HomePage() {
   return (
     <DashboardLayout>
       <div className="p-6">
-        {/* Promotions Carousel */}
-        {stats.activePromotions.length > 0 && (
-          <Card className="bg-white border-0 shadow-sm mb-6">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[green-50] rounded-lg flex items-center justify-center">
-                    <Megaphone className="w-5 h-5 text-[#00D084]" />
-                  </div>
-                  <CardTitle className="text-lg font-semibold text-[#1c1d1d]">โปรโมชั่น</CardTitle>
-                </div>
-                <Link href="/admin/promotions">
-                  <Button variant="ghost" size="sm" className="text-[#6b7280] hover:text-[#00D084]">
-                    ดูทั้งหมด
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <PromotionCarousel promotions={stats.activePromotions} />
-            </CardContent>
-          </Card>
-        )}
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
