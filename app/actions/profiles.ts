@@ -151,6 +151,85 @@ export async function deleteCustomer(id: string) {
   const supabase = createServerClient();
 
   try {
+    // First, find demo_users related to this profile
+    const { data: demoUsers, error: findDemoUsersError } = await supabase
+      .from("demo_users")
+      .select("id")
+      .eq("profile_id", id);
+
+    if (findDemoUsersError) {
+      console.error("Error finding demo_users:", findDemoUsersError);
+      // Continue anyway, might not have demo_users
+    }
+
+    // Delete related demo data if demo_users exist
+    if (demoUsers && demoUsers.length > 0) {
+      const demoUserIds = demoUsers.map(u => u.id);
+      
+      // Delete demo_points_ledger first (references demo_user_id)
+      const { error: ledgerError } = await supabase
+        .from("demo_points_ledger")
+        .delete()
+        .in("demo_user_id", demoUserIds);
+
+      if (ledgerError) {
+        console.error("Error deleting demo_points_ledger:", ledgerError);
+      }
+
+      // Delete demo_topup_orders (references demo_user_id)
+      const { error: ordersError } = await supabase
+        .from("demo_topup_orders")
+        .delete()
+        .in("demo_user_id", demoUserIds);
+
+      if (ordersError) {
+        console.error("Error deleting demo_topup_orders:", ordersError);
+      }
+
+      // Delete demo_wallets (references demo_user_id)
+      const { error: walletsError } = await supabase
+        .from("demo_wallets")
+        .delete()
+        .in("demo_user_id", demoUserIds);
+
+      if (walletsError) {
+        console.error("Error deleting demo_wallets:", walletsError);
+      }
+
+      // Finally delete demo_users
+      const { error: demoUsersError } = await supabase
+        .from("demo_users")
+        .delete()
+        .eq("profile_id", id);
+
+      if (demoUsersError) {
+        console.error("Error deleting demo_users:", demoUsersError);
+      }
+    }
+
+    // Delete redemptions
+    const { error: redemptionsError } = await supabase
+      .from("redemptions")
+      .delete()
+      .eq("customer_id", id);
+
+    if (redemptionsError) {
+      console.error("Error deleting redemptions:", redemptionsError);
+      // Continue anyway
+    }
+
+    // Delete slip_submissions
+    const { error: slipSubmissionsError } = await supabase
+      .from("slip_submissions")
+      .delete()
+      .eq("customer_id", id);
+
+    if (slipSubmissionsError) {
+      console.error("Error deleting slip_submissions:", slipSubmissionsError);
+      // Continue anyway
+    }
+
+    // Finally, delete the profile
     const { error } = await supabase
       .from("profiles")
       .delete()
@@ -162,6 +241,7 @@ export async function deleteCustomer(id: string) {
     revalidatePath("/admin/customers");
     return { success: true, message: "ลบสมาชิกสำเร็จ" };
   } catch (error: any) {
+    console.error("Error deleting customer:", error);
     return { 
       success: false, 
       message: error.message || "เกิดข้อผิดพลาดในการลบสมาชิก" 
