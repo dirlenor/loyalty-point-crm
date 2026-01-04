@@ -44,6 +44,9 @@ export default function CustomerPromotionsPage() {
         // Load active promotions only
         const promotionsData = await getPromotions(true);
         setPromotions(promotionsData);
+        
+        // Mark promotions as viewed when user visits the page
+        localStorage.setItem("has_viewed_promotions", "true");
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {

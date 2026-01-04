@@ -25,18 +25,25 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
     setCustomerName(name || "");
     setCustomerPoints(points);
 
-    // Load promotion count
+    // Load promotion count and check if user has viewed promotions
     const loadPromotionCount = async () => {
       try {
         const { getActivePromotionsCount } = await import("@/app/actions/promotions");
         const count = await getActivePromotionsCount();
-        setPromotionCount(count);
+        const hasViewedPromotions = localStorage.getItem("has_viewed_promotions") === "true";
+        
+        // Only show badge if there are promotions and user hasn't viewed them
+        if (count > 0 && !hasViewedPromotions) {
+          setPromotionCount(count);
+        } else {
+          setPromotionCount(0);
+        }
       } catch (error) {
         console.error("Error loading promotion count:", error);
       }
     };
     loadPromotionCount();
-  }, []);
+  }, [pathname]); // Re-check when pathname changes
 
   const handleLogout = () => {
     localStorage.removeItem("line_user_id");
@@ -122,42 +129,77 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
         </header>
 
         {/* Main Content */}
-        <main className="pb-20">
+        <main className="pb-32">
           {children}
         </main>
 
-        {/* Bottom Navigation */}
+        {/* Bottom Navigation - 2 Rows, 3 items per row */}
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e4e4e4] z-50 max-w-md mx-auto shadow-lg">
-          <div className="grid grid-cols-6">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex flex-col items-center justify-center py-3 transition-colors relative",
-                    isActive
-                      ? "text-[#00D084] bg-green-50"
-                      : "text-[#727272]"
-                  )}
-                >
-                  <div className="relative">
-                    <Icon className="w-5 h-5 mb-1" />
-                    {item.badge && item.badge > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                        {item.badge > 9 ? "9+" : item.badge}
-                      </span>
+          <div className="flex flex-col">
+            {/* First Row - 3 items */}
+            <div className="grid grid-cols-3 border-b border-[#e4e4e4]">
+              {menuItems.slice(0, 3).map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex flex-col items-center justify-center py-3 transition-colors relative",
+                      isActive
+                        ? "text-[#00D084] bg-green-50"
+                        : "text-[#727272]"
                     )}
-                  </div>
-                  <span className="text-[10px] font-medium leading-tight text-center px-1">
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
+                  >
+                    <div className="relative">
+                      <Icon className="w-5 h-5 mb-1" />
+                      {item.badge && item.badge > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {item.badge > 9 ? "9+" : item.badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-medium leading-tight text-center px-1">
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+            {/* Second Row - 3 items */}
+            <div className="grid grid-cols-3">
+              {menuItems.slice(3, 6).map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex flex-col items-center justify-center py-3 transition-colors relative",
+                      isActive
+                        ? "text-[#00D084] bg-green-50"
+                        : "text-[#727272]"
+                    )}
+                  >
+                    <div className="relative">
+                      <Icon className="w-5 h-5 mb-1" />
+                      {item.badge && item.badge > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {item.badge > 9 ? "9+" : item.badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-medium leading-tight text-center px-1">
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </nav>
       </div>
