@@ -7,12 +7,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomerLayout } from "@/components/customer-layout";
 import { Megaphone } from "lucide-react";
 import { findProfileByLineUserId } from "@/app/actions/profiles";
-import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function CustomerPromotionsPage() {
   const [promotions, setPromotions] = useState<any[]>([]);
   const [customer, setCustomer] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPromotion, setSelectedPromotion] = useState<any | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -61,21 +69,26 @@ export default function CustomerPromotionsPage() {
   }
 
   const PromotionCard = ({ promotion }: { promotion: any }) => (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={() => {
+        setSelectedPromotion(promotion);
+        setIsDialogOpen(true);
+      }}
+    >
       {promotion.image_url && (
-        <div className="aspect-video w-full overflow-hidden bg-muted relative">
-          <Image
+        <div className="aspect-video w-full overflow-hidden bg-muted">
+          <img
             src={promotion.image_url}
             alt={promotion.title}
-            fill
-            className="object-cover"
+            className="w-full h-full object-cover"
           />
         </div>
       )}
       <CardHeader>
         <CardTitle className="text-lg">{promotion.title}</CardTitle>
         {promotion.description && (
-          <p className="text-sm text-muted-foreground mt-2 whitespace-pre-line">
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
             {promotion.description}
           </p>
         )}
@@ -121,6 +134,35 @@ export default function CustomerPromotionsPage() {
           )}
         </div>
       </div>
+
+      {/* Promotion Detail Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          {selectedPromotion && (
+            <>
+              {selectedPromotion.image_url && (
+                <div className="aspect-video w-full overflow-hidden bg-muted rounded-lg mb-4">
+                  <img
+                    src={selectedPromotion.image_url}
+                    alt={selectedPromotion.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{selectedPromotion.title}</DialogTitle>
+                <DialogDescription className="text-base">
+                  {selectedPromotion.description && (
+                    <p className="text-muted-foreground mt-2 whitespace-pre-line">
+                      {selectedPromotion.description}
+                    </p>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </CustomerLayout>
   );
 }
