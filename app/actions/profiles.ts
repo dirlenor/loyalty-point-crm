@@ -173,31 +173,45 @@ export async function deleteCustomer(id: string) {
         // Continue anyway - might not exist
       }
 
-      // Step 2: Delete demo_topup_orders (references demo_user_id)
-      // This is critical - must be deleted before demo_users
-      const { error: ordersError } = await supabase
+      // Step 2: First, find all demo_topup_orders for these users
+      const { data: orders } = await supabase
         .from("demo_topup_orders")
-        .delete()
+        .select("id")
         .in("demo_user_id", demoUserIds);
 
-      if (ordersError) {
-        console.error("Error deleting demo_topup_orders:", ordersError);
-        // If this fails, we cannot continue - throw error
-        if (ordersError.code === "23503" || ordersError.message?.includes("foreign key")) {
-          // Try to find and delete any remaining orders
-          const { data: remainingOrders } = await supabase
-            .from("demo_topup_orders")
-            .select("id")
-            .in("demo_user_id", demoUserIds);
-          
-          if (remainingOrders && remainingOrders.length > 0) {
-            // Try deleting one by one
-            for (const order of remainingOrders) {
-              await supabase.from("demo_topup_orders").delete().eq("id", order.id);
+      if (orders && orders.length > 0) {
+        const orderIds = orders.map(o => o.id);
+        
+        // Step 2a: Delete demo_topup_transactions FIRST (references order_id)
+        const { error: transactionsError } = await supabase
+          .from("demo_topup_transactions")
+          .delete()
+          .in("order_id", orderIds);
+
+        if (transactionsError) {
+          console.error("Error deleting demo_topup_transactions:", transactionsError);
+          // Continue anyway - might not exist
+        }
+
+        // Step 2b: Now delete demo_topup_orders
+        const { error: ordersError } = await supabase
+          .from("demo_topup_orders")
+          .delete()
+          .in("id", orderIds);
+
+        if (ordersError) {
+          console.error("Error deleting demo_topup_orders:", ordersError);
+          // If this fails, try deleting one by one
+          if (ordersError.code === "23503" || ordersError.message?.includes("foreign key")) {
+            for (const orderId of orderIds) {
+              // Delete transactions for this order first
+              await supabase.from("demo_topup_transactions").delete().eq("order_id", orderId);
+              // Then delete the order
+              await supabase.from("demo_topup_orders").delete().eq("id", orderId);
             }
+          } else {
+            throw ordersError;
           }
-        } else {
-          throw ordersError;
         }
       }
 
@@ -222,7 +236,7 @@ export async function deleteCustomer(id: string) {
     if (allDemoUsers && allDemoUsers.length > 0) {
       const allDemoUserIds = allDemoUsers.map(u => u.id);
       
-      // CRITICAL: Delete demo_topup_orders FIRST - this is the main blocker
+      // CRITICAL: Delete demo_topup_transactions FIRST, then demo_topup_orders
       // Delete multiple times to ensure all are gone
       let retryCount = 0;
       let hasOrders = true;
@@ -236,6 +250,19 @@ export async function deleteCustomer(id: string) {
         
         if (remainingOrders && remainingOrders.length > 0) {
           const orderIds = remainingOrders.map(o => o.id);
+          
+          // Delete transactions first
+          const { error: deleteTransactionsError } = await supabase
+            .from("demo_topup_transactions")
+            .delete()
+            .in("order_id", orderIds);
+          
+          if (deleteTransactionsError) {
+            console.error(`Error deleting demo_topup_transactions (attempt ${retryCount + 1}):`, deleteTransactionsError);
+            // Continue anyway - might not exist
+          }
+          
+          // Then delete orders
           const { error: deleteOrdersError } = await supabase
             .from("demo_topup_orders")
             .delete()
@@ -284,6 +311,9 @@ export async function deleteCustomer(id: string) {
           
           if (finalOrders && finalOrders.length > 0) {
             const finalOrderIds = finalOrders.map(o => o.id);
+            // Delete transactions first
+            await supabase.from("demo_topup_transactions").delete().in("order_id", finalOrderIds);
+            // Then delete orders
             await supabase.from("demo_topup_orders").delete().in("id", finalOrderIds);
           }
           
