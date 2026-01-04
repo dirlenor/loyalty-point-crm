@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { Gift, Users, ShoppingBag, Award, Home, UserCircle, Menu, X, History, FileCheck, ScanLine, QrCode, Wallet, ChevronDown, ChevronRight, ListOrdered } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { getPendingSlipCount } from "@/app/actions/slip-submissions";
+import { useAdminNotifications } from "@/hooks/use-admin-notifications";
+import { Bell, BellOff } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -14,25 +15,19 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [pendingSlipCount, setPendingSlipCount] = useState(0);
   const [topupMenuOpen, setTopupMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const loadPendingCount = async () => {
-      const count = await getPendingSlipCount();
-      setPendingSlipCount(count);
-    };
-    loadPendingCount();
-    // Refresh every 30 seconds
-    const interval = setInterval(loadPendingCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  
+  // Use notification hook
+  const { notifications, isMuted, setIsMuted } = useAdminNotifications();
+  
+  // Use notifications data for slip count
+  const pendingSlipCount = notifications.pendingSlips;
 
   const menuItems = [
     { href: "/", label: "Dashboard", icon: Home },
     { href: "/admin/customers", label: "สมาชิก", icon: UserCircle },
     { href: "/admin/rewards", label: "รางวัลทั้งหมด", icon: Gift },
-    { href: "/admin/redemptions", label: "รายการแลก", icon: ShoppingBag },
+    { href: "/admin/redemptions", label: "รายการแลก", icon: ShoppingBag, badge: "redemptions" },
     { href: "/admin/verify-redemption", label: "ยืนยันรับรางวัล", icon: ScanLine },
     { href: "/admin/slip-review", label: "ตรวจสอบสลิป", icon: FileCheck, badge: true },
     { href: "/admin/history", label: "ประวัติทั้งหมด", icon: History },
@@ -99,9 +94,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm font-medium">{item.label}</span>
-                {item.badge && pendingSlipCount > 0 && (
+                {item.badge === true && notifications.pendingSlips > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    {pendingSlipCount > 9 ? "9+" : pendingSlipCount}
+                    {notifications.pendingSlips > 9 ? "9+" : notifications.pendingSlips}
+                  </span>
+                )}
+                {item.badge === "redemptions" && notifications.pendingRedemptions > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {notifications.pendingRedemptions > 9 ? "9+" : notifications.pendingRedemptions}
                   </span>
                 )}
               </Link>
@@ -173,6 +173,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         >
                           <SubIcon className="w-4 h-4 flex-shrink-0" />
                           <span className="font-medium">{subItem.label}</span>
+                          {subItem.href === "/admin/demo-topup/orders" && notifications.pendingTopups > 0 && (
+                            <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                              {notifications.pendingTopups > 9 ? "9+" : notifications.pendingTopups}
+                            </span>
+                          )}
                         </Link>
                       );
                     })}
@@ -203,12 +208,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Notification */}
-            <button className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-50 cursor-pointer relative">
-              <svg className="w-5 h-5 text-[#6b7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-            </button>
+            {/* Notification Toggle & Badge */}
+            <div className="relative">
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-50 cursor-pointer relative"
+                title={isMuted ? "เปิดเสียงแจ้งเตือน" : "ปิดเสียงแจ้งเตือน"}
+              >
+                {isMuted ? (
+                  <BellOff className="w-5 h-5 text-[#6b7280]" />
+                ) : (
+                  <Bell className="w-5 h-5 text-[#6b7280]" />
+                )}
+                {notifications.total > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {notifications.total > 9 ? "9+" : notifications.total}
+                  </span>
+                )}
+              </button>
+            </div>
             
             {/* Profile */}
             <div className="flex items-center gap-3 pl-3 border-l border-[#e5e7eb]">
@@ -250,9 +268,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm font-medium">{item.label}</span>
-                    {item.badge && pendingSlipCount > 0 && (
+                    {item.badge === true && notifications.pendingSlips > 0 && (
                       <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                        {pendingSlipCount > 9 ? "9+" : pendingSlipCount}
+                        {notifications.pendingSlips > 9 ? "9+" : notifications.pendingSlips}
+                      </span>
+                    )}
+                    {item.badge === "redemptions" && notifications.pendingRedemptions > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {notifications.pendingRedemptions > 9 ? "9+" : notifications.pendingRedemptions}
                       </span>
                     )}
                   </Link>
@@ -323,6 +346,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             >
                               <SubIcon className="w-4 h-4 flex-shrink-0" />
                               <span className="font-medium">{subItem.label}</span>
+                              {subItem.href === "/admin/demo-topup/orders" && notifications.pendingTopups > 0 && (
+                                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                  {notifications.pendingTopups > 9 ? "9+" : notifications.pendingTopups}
+                                </span>
+                              )}
                             </Link>
                           );
                         })}
