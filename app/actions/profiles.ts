@@ -157,11 +157,6 @@ export async function deleteCustomer(id: string) {
       .select("id")
       .eq("profile_id", id);
 
-    if (findDemoUsersError) {
-      console.error("Error finding demo_users:", findDemoUsersError);
-      // Continue anyway, might not have demo_users
-    }
-
     // Delete related demo data if demo_users exist
     if (demoUsers && demoUsers.length > 0) {
       const demoUserIds = demoUsers.map(u => u.id);
@@ -174,6 +169,7 @@ export async function deleteCustomer(id: string) {
 
       if (ledgerError) {
         console.error("Error deleting demo_points_ledger:", ledgerError);
+        // Continue anyway
       }
 
       // Delete demo_topup_orders (references demo_user_id)
@@ -184,6 +180,7 @@ export async function deleteCustomer(id: string) {
 
       if (ordersError) {
         console.error("Error deleting demo_topup_orders:", ordersError);
+        // Continue anyway
       }
 
       // Delete demo_wallets (references demo_user_id)
@@ -194,17 +191,56 @@ export async function deleteCustomer(id: string) {
 
       if (walletsError) {
         console.error("Error deleting demo_wallets:", walletsError);
+        // Continue anyway
       }
+    }
 
-      // Finally delete demo_users
-      const { error: demoUsersError } = await supabase
-        .from("demo_users")
-        .delete()
-        .eq("profile_id", id);
+    // ALWAYS try to delete demo_users, even if we didn't find any
+    // This ensures we remove any orphaned records or handle edge cases
+    // We need to delete this BEFORE deleting profile to avoid foreign key constraint
+    const { error: demoUsersError } = await supabase
+      .from("demo_users")
+      .delete()
+      .eq("profile_id", id);
 
-      if (demoUsersError) {
+    if (demoUsersError) {
+      // Check if it's a foreign key constraint error
+      if (demoUsersError.code === "23503" || demoUsersError.message?.includes("foreign key")) {
+        // This means there are still references - we need to delete them first
+        // Try to find and delete any remaining related data
+        const { data: remainingDemoUsers } = await supabase
+          .from("demo_users")
+          .select("id")
+          .eq("profile_id", id);
+
+        if (remainingDemoUsers && remainingDemoUsers.length > 0) {
+          const remainingIds = remainingDemoUsers.map(u => u.id);
+          
+          // Force delete all related data
+          await supabase.from("demo_points_ledger").delete().in("demo_user_id", remainingIds);
+          await supabase.from("demo_topup_orders").delete().in("demo_user_id", remainingIds);
+          await supabase.from("demo_wallets").delete().in("demo_user_id", remainingIds);
+          
+          // Try again
+          const { error: retryError } = await supabase
+            .from("demo_users")
+            .delete()
+            .eq("profile_id", id);
+          
+          if (retryError && retryError.code !== "PGRST116") {
+            console.error("Error deleting demo_users after retry:", retryError);
+            throw retryError;
+          }
+        } else {
+          // No demo_users found, which is fine
+          console.log("No demo_users found to delete");
+        }
+      } else if (demoUsersError.code !== "PGRST116") {
+        // Other errors should be thrown
         console.error("Error deleting demo_users:", demoUsersError);
+        throw demoUsersError;
       }
+      // PGRST116 means no rows found, which is fine
     }
 
     // Delete redemptions
