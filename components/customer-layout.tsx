@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Award, Home, ShoppingBag, LogOut, User, Upload, Wallet } from "lucide-react";
+import { Award, Home, ShoppingBag, LogOut, User, Upload, Wallet, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -17,12 +17,25 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
   const pathname = usePathname();
   const [customerName, setCustomerName] = useState("");
   const [customerPoints, setCustomerPoints] = useState(0);
+  const [promotionCount, setPromotionCount] = useState(0);
 
   useEffect(() => {
     const name = localStorage.getItem("customer_name");
     const points = parseInt(localStorage.getItem("customer_points") || "0");
     setCustomerName(name || "");
     setCustomerPoints(points);
+
+    // Load promotion count
+    const loadPromotionCount = async () => {
+      try {
+        const { getActivePromotionsCount } = await import("@/app/actions/promotions");
+        const count = await getActivePromotionsCount();
+        setPromotionCount(count);
+      } catch (error) {
+        console.error("Error loading promotion count:", error);
+      }
+    };
+    loadPromotionCount();
   }, []);
 
   const handleLogout = () => {
@@ -37,6 +50,7 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
   const menuItems = [
     { href: "/customer/dashboard", label: "หน้าหลัก", icon: Home },
     { href: "/customer/store", label: "ร้านรางวัล", icon: Award },
+    { href: "/customer/promotions", label: "โปรโมชั่น", icon: Megaphone, badge: promotionCount > 0 ? promotionCount : undefined },
     { href: "/customer/upload-slip", label: "อัปโหลดสลิป", icon: Upload },
     { href: "/customer/history", label: "ประวัติ", icon: ShoppingBag },
     { href: "/customer/demo-wallet", label: "Demo Wallet", icon: Wallet },
@@ -114,7 +128,7 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
 
         {/* Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e4e4e4] z-50 max-w-md mx-auto shadow-lg">
-          <div className="grid grid-cols-5">
+          <div className="grid grid-cols-6">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -124,14 +138,23 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex flex-col items-center justify-center py-3 transition-colors",
+                    "flex flex-col items-center justify-center py-3 transition-colors relative",
                     isActive
                       ? "text-[#00D084] bg-green-50"
                       : "text-[#727272]"
                   )}
                 >
-                  <Icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium">{item.label}</span>
+                  <div className="relative">
+                    <Icon className="w-5 h-5 mb-1" />
+                    {item.badge && item.badge > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                        {item.badge > 9 ? "9+" : item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-medium leading-tight text-center px-1">
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}

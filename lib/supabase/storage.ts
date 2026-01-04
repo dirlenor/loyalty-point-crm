@@ -80,3 +80,70 @@ export function getSlipImageUrl(filePath: string): string {
   return publicUrl;
 }
 
+/**
+ * Upload promotion image to Supabase Storage
+ * @param file - File object or Buffer
+ * @returns Public URL of uploaded image
+ */
+export async function uploadPromotionImage(
+  file: File | Buffer
+): Promise<{ url: string; path: string }> {
+  const supabase = createServerClient();
+
+  // Generate unique filename
+  const timestamp = Date.now();
+  const randomStr = Math.random().toString(36).substring(2, 15);
+  const extension = file instanceof File ? file.name.split(".").pop() : "jpg";
+  const fileName = `${timestamp}-${randomStr}.${extension}`;
+  const filePath = `promotion-images/${fileName}`;
+
+  // Convert File to Buffer if needed
+  let fileBuffer: Buffer;
+  if (file instanceof File) {
+    const arrayBuffer = await file.arrayBuffer();
+    fileBuffer = Buffer.from(arrayBuffer);
+  } else {
+    fileBuffer = file;
+  }
+
+  // Upload to Supabase Storage
+  // Note: You need to create a bucket called "promotion-images" in Supabase Storage
+  // and make it public
+  const { data, error } = await supabase.storage
+    .from("promotion-images")
+    .upload(filePath, fileBuffer, {
+      contentType: file instanceof File ? file.type : "image/jpeg",
+      upsert: false,
+    });
+
+  if (error) {
+    throw new Error(`Failed to upload image: ${error.message}`);
+  }
+
+  // Get public URL
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("promotion-images").getPublicUrl(filePath);
+
+  return {
+    url: publicUrl,
+    path: filePath,
+  };
+}
+
+/**
+ * Delete promotion image from Supabase Storage
+ * @param filePath - Path to file in storage
+ */
+export async function deletePromotionImage(filePath: string): Promise<void> {
+  const supabase = createServerClient();
+
+  const { error } = await supabase.storage
+    .from("promotion-images")
+    .remove([filePath]);
+
+  if (error) {
+    throw new Error(`Failed to delete image: ${error.message}`);
+  }
+}
+
