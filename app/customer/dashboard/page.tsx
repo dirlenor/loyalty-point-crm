@@ -5,19 +5,31 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CustomerLayout } from "@/components/customer-layout";
-import { Award, Gift, ShoppingBag, TrendingUp } from "lucide-react";
+import { Award, Gift, ShoppingBag, TrendingUp, Megaphone } from "lucide-react";
 import Link from "next/link";
 import { findProfileByLineUserId } from "@/app/actions/profiles";
 import { getRewards } from "@/app/actions/rewards";
+import { getPromotions } from "@/app/actions/promotions";
 import { getCustomerRedemptions } from "@/app/actions/customer-redemptions";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { PromotionCarousel } from "@/components/promotion-carousel";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function CustomerDashboardPage() {
   const [customer, setCustomer] = useState<any>(null);
   const [rewards, setRewards] = useState<any[]>([]);
+  const [promotions, setPromotions] = useState<any[]>([]);
   const [redemptions, setRedemptions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPromotion, setSelectedPromotion] = useState<any | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -37,6 +49,10 @@ export default function CustomerDashboardPage() {
           // Load rewards
           const rewardsData = await getRewards();
           setRewards(rewardsData);
+          
+          // Load active promotions
+          const promotionsData = await getPromotions(true);
+          setPromotions(promotionsData);
           
           // Load redemptions
           const redemptionsData = await getCustomerRedemptions(result.data.id);
@@ -80,6 +96,23 @@ export default function CustomerDashboardPage() {
             ยินดีต้อนรับสู่ระบบ 6CAT Point
           </p>
         </div>
+
+        {/* Promotions Carousel */}
+        {promotions.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-6 bg-[#00D084] rounded-full"></div>
+              <h2 className="text-xl font-bold text-[#211c37]">โปรโมชั่น</h2>
+            </div>
+            <PromotionCarousel 
+              promotions={promotions}
+              onPromotionClick={(promotion) => {
+                setSelectedPromotion(promotion);
+                setIsDialogOpen(true);
+              }}
+            />
+          </div>
+        )}
 
         {/* Points Card */}
         <Card className="mb-6 border-2 border-[#00D084] shadow-lg bg-gradient-to-br from-green-50 to-red-50">
@@ -250,6 +283,35 @@ export default function CustomerDashboardPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Promotion Detail Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            {selectedPromotion && (
+              <>
+                {selectedPromotion.image_url && (
+                  <div className="aspect-video w-full overflow-hidden bg-muted rounded-lg mb-4">
+                    <img
+                      src={selectedPromotion.image_url}
+                      alt={selectedPromotion.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">{selectedPromotion.title}</DialogTitle>
+                  <DialogDescription className="text-base">
+                    {selectedPromotion.description && (
+                      <p className="text-muted-foreground mt-2 whitespace-pre-line">
+                        {selectedPromotion.description}
+                      </p>
+                    )}
+                  </DialogDescription>
+                </DialogHeader>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </CustomerLayout>
   );

@@ -67,6 +67,14 @@ export async function getDashboardStats() {
     .order("points_required", { ascending: true })
     .limit(10);
 
+  // Get active promotions
+  const { data: activePromotions } = await supabase
+    .from("promotions")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
   return {
     totalCustomers: totalCustomers || 0,
     totalPoints,
@@ -76,6 +84,7 @@ export async function getDashboardStats() {
     recentRedemptions: recentRedemptions || [],
     recentRewards: recentRewards || [],
     availableRewards: availableRewards || [],
+    activePromotions: activePromotions || [],
   };
 }
 
