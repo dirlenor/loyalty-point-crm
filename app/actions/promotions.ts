@@ -6,18 +6,23 @@ import { z } from "zod";
 
 const promotionSchema = z.object({
   title: z.string().min(1, "กรุณากรอกชื่อโปรโมชั่น"),
-  description: z.string().optional(),
-  image_url: z.string().url().optional().or(z.literal("")),
+  description: z.string().nullable().optional(),
+  image_url: z.union([
+    z.string().url(),
+    z.literal(""),
+    z.null(),
+  ]).optional(),
   is_active: z.boolean().default(true),
 });
 
 export async function createPromotion(formData: FormData) {
   const supabase = createServerClient();
 
+  const imageUrl = formData.get("image_url") as string;
   const data = {
     title: formData.get("title") as string,
-    description: formData.get("description") as string,
-    image_url: formData.get("image_url") as string || null,
+    description: formData.get("description") as string || null,
+    image_url: imageUrl && imageUrl.trim() !== "" ? imageUrl : null,
     is_active: formData.get("is_active") === "true" || formData.get("is_active") === "on",
   };
 
@@ -44,10 +49,11 @@ export async function createPromotion(formData: FormData) {
 export async function updatePromotion(id: string, formData: FormData) {
   const supabase = createServerClient();
 
+  const imageUrl = formData.get("image_url") as string;
   const data = {
     title: formData.get("title") as string,
-    description: formData.get("description") as string,
-    image_url: formData.get("image_url") as string || null,
+    description: formData.get("description") as string || null,
+    image_url: imageUrl && imageUrl.trim() !== "" ? imageUrl : null,
     is_active: formData.get("is_active") === "true" || formData.get("is_active") === "on",
     updated_at: new Date().toISOString(),
   };
