@@ -97,7 +97,17 @@ export default function CustomerDemoWalletPage() {
 
   return (
     <CustomerLayout>
-      <div className="p-4">
+      <div className="p-4 relative">
+        {/* Beta Watermark */}
+        <div className="absolute top-4 right-4 z-10">
+          <Badge 
+            variant="outline" 
+            className="bg-yellow-100/80 text-yellow-700 border-yellow-300 text-xs font-semibold opacity-60"
+          >
+            BETA
+          </Badge>
+        </div>
+
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-[#211c37] mb-2">
             Demo Wallet
