@@ -71,6 +71,12 @@ export default function CustomerDemoTopupPage() {
 
     setIsCreating(true);
     try {
+      // Handle phone - use null if phone is LINE- format or invalid
+      let phoneValue = customer.phone;
+      if (!phoneValue || phoneValue.startsWith("LINE-")) {
+        phoneValue = null;
+      }
+
       const response = await fetch("/api/demo/topup/create", {
         method: "POST",
         headers: {
@@ -79,8 +85,8 @@ export default function CustomerDemoTopupPage() {
         body: JSON.stringify({
           userId: customer.id,
           amount: amountNum,
-          phone: customer.phone,
-          fullName: customer.full_name,
+          phone: phoneValue,
+          fullName: customer.full_name || customer.fullName || "ลูกค้า",
         }),
       });
 
@@ -93,13 +99,15 @@ export default function CustomerDemoTopupPage() {
           description: `กรุณาสแกน QR Code เพื่อเติมเงิน`,
         });
       } else {
+        console.error("Topup error:", result);
         toast({
           title: "เกิดข้อผิดพลาด",
-          description: result.message,
+          description: result.message || "ไม่สามารถสร้าง Order ได้",
           variant: "destructive",
         });
       }
     } catch (error: any) {
+      console.error("Topup exception:", error);
       toast({
         title: "เกิดข้อผิดพลาด",
         description: error.message || "ไม่สามารถสร้าง Order ได้",

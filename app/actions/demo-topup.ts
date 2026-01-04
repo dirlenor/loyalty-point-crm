@@ -25,42 +25,69 @@ export async function findOrCreateDemoUser(profileId?: string, phone?: string, f
   try {
     // If profileId provided, try to find existing demo user
     if (profileId) {
-      const { data: existing } = await supabase
+      const { data: existing, error: findError } = await supabase
         .from("demo_users")
         .select("*")
         .eq("profile_id", profileId)
-        .single();
+        .maybeSingle();
+
+      if (findError && findError.code !== "PGRST116") {
+        console.error("Error finding demo user by profile_id:", findError);
+        throw findError;
+      }
 
       if (existing) {
         return { success: true, data: existing };
       }
     }
 
-    // If phone provided, try to find by phone
-    if (phone) {
-      const { data: existing } = await supabase
+    // If phone provided and not LINE- format, try to find by phone
+    if (phone && !phone.startsWith("LINE-")) {
+      const { data: existing, error: findError } = await supabase
         .from("demo_users")
         .select("*")
         .eq("phone", phone)
-        .single();
+        .maybeSingle();
+
+      if (findError && findError.code !== "PGRST116") {
+        console.error("Error finding demo user by phone:", findError);
+        throw findError;
+      }
 
       if (existing) {
+        // Update profile_id if it was missing
+        if (!existing.profile_id && profileId) {
+          const { error: updateError } = await supabase
+            .from("demo_users")
+            .update({ profile_id: profileId })
+            .eq("id", existing.id);
+          
+          if (updateError) {
+            console.error("Error updating demo user profile_id:", updateError);
+          }
+        }
         return { success: true, data: existing };
       }
     }
 
     // Create new demo user
+    // Only use phone if it's a valid phone number (not LINE- format)
+    const phoneValue = phone && !phone.startsWith("LINE-") ? phone : null;
+    
     const { data: newUser, error } = await supabase
       .from("demo_users")
       .insert({
         profile_id: profileId || null,
-        phone: phone || null,
+        phone: phoneValue,
         full_name: fullName || "Demo User",
       })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error creating demo user:", error);
+      throw error;
+    }
 
     // Create wallet for new user
     const { error: walletError } = await supabase.from("demo_wallets").insert({
@@ -75,6 +102,7 @@ export async function findOrCreateDemoUser(profileId?: string, phone?: string, f
 
     return { success: true, data: newUser };
   } catch (error: any) {
+    console.error("findOrCreateDemoUser error:", error);
     return {
       success: false,
       message: error.message || "เกิดข้อผิดพลาดในการสร้าง demo user",
@@ -96,6 +124,14 @@ export async function createDemoTopupOrder(
   DEMO_CONFIG.validateDemoMode();
 
   try {
+    // Validate userId
+    if (!userId || userId.trim().length === 0) {
+      return {
+        success: false,
+        message: "ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่",
+      };
+    }
+
     // Validate amount
     if (amount <= 0 || amount > 100000) {
       return {
@@ -107,9 +143,10 @@ export async function createDemoTopupOrder(
     // Find or create demo user
     const userResult = await findOrCreateDemoUser(userId, phone, fullName);
     if (!userResult.success || !userResult.data) {
+      console.error("Failed to find or create demo user:", userResult.message);
       return {
         success: false,
-        message: userResult.message || "ไม่สามารถสร้าง demo user ได้",
+        message: userResult.message || "ไม่สามารถสร้าง demo user ได้ กรุณาลองใหม่อีกครั้ง",
       };
     }
 
